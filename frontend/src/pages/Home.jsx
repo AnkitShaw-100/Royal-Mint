@@ -85,7 +85,7 @@ function Home() {
       {/* Hero Section */}
       <div className="text-center space-y-6 py-8">
         <Badge variant="secondary" className="px-4 py-1.5 text-sm font-medium">
-          Welcome to SecureBank Online Portal
+          Welcome to Royal Mint Online Portal
         </Badge>
         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
           Your Complete Banking

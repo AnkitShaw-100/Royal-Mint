@@ -44,7 +44,7 @@ function Header() {
               <Building2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">SecureBank</h1>
+              <h1 className="text-xl font-bold text-gray-900">Royal Mint</h1>
               <p className="text-xs text-gray-500">Online Banking</p>
             </div>
           </div>
@@ -120,7 +120,7 @@ function App() {
                   <Building2 className="w-16 h-16 text-blue-600" />
                 </div>
                 <h2 className="text-6xl font-bold text-gray-900">
-                  Welcome to <span className="text-blue-600">SecureBank</span>
+                  Welcome to <span className="text-blue-600">Royal Mint</span>
                 </h2>
                 <p className="text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
                   Experience modern banking with enterprise-grade security. 
