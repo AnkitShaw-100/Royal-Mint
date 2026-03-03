@@ -17,6 +17,11 @@ const userSchema = new mongoose.Schema(
     firstName: String,
     lastName: String,
     profileImage: String,
+    isSystemUser: {
+      type: Boolean,
+      default: false,
+      immutable: true, // Cannot be changed via API, only via direct DB access
+    },
   },
   {
     timestamps: true,

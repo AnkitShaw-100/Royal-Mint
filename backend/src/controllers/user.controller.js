@@ -1,4 +1,5 @@
 import userModel from "../models/user.model.js";
+import { sendRegistrationEmail } from "../services/email.service.js";
 
 // Save or update user from Clerk
 async function saveOrUpdateUserController(req, res) {
@@ -18,6 +19,7 @@ async function saveOrUpdateUserController(req, res) {
 
     // Find user and update, or create if doesn't exist
     let user = await userModel.findOne({ clerkId });
+    let isNewUser = false;
 
     if (user) {
       // Update existing user
@@ -37,9 +39,19 @@ async function saveOrUpdateUserController(req, res) {
         lastName,
         profileImage,
       });
+      isNewUser = true;
     }
 
     console.log("User synced successfully:", user);
+
+    // Send registration email for new users only
+    if (isNewUser) {
+      await sendRegistrationEmail({
+        to: email,
+        firstName: firstName || "",
+        lastName: lastName || "",
+      });
+    }
 
     res.status(201).json({
       status: "success",

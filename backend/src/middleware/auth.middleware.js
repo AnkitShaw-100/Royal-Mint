@@ -46,4 +46,44 @@ async function authMiddleware(req, res, next) {
   }
 }
 
+/**
+ * System User Middleware - Verify user is a system admin
+ * Must be used AFTER authMiddleware
+ * Checks if req.user.isSystemUser === true
+ */
+async function systemUserMiddleware(req, res, next) {
+  try {
+    // Check if user was authenticated by authMiddleware
+    if (!req.user) {
+      return res.status(401).json({
+        status: "failed",
+        message: "Authentication required. Please use authMiddleware first.",
+      });
+    }
+
+    // Check if user is a system user
+    if (!req.user.isSystemUser) {
+      console.log(
+        "Access denied - User is not a system admin:",
+        req.user.email
+      );
+      return res.status(403).json({
+        status: "failed",
+        message: "Access denied. System administrator privileges required.",
+      });
+    }
+
+    console.log("System user access granted:", req.user.email);
+    next();
+  } catch (error) {
+    console.error("System User Middleware Error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Authorization error",
+      error: error.message,
+    });
+  }
+}
+
 export default authMiddleware;
+export { authMiddleware, systemUserMiddleware };
