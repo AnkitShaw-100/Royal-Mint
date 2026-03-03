@@ -1,6 +1,6 @@
-import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react'
+import { SignedIn, SignedOut, SignInButton, SignUpButton } from '@clerk/clerk-react'
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
@@ -9,101 +9,8 @@ import Accounts from './pages/Accounts'
 import Transfer from './pages/Transfer'
 import History from './pages/History'
 import { useSyncUserToDatabase } from './hooks/useSyncUserToDatabase'
-import { 
-  LayoutDashboard, 
-  Wallet, 
-  ArrowLeftRight, 
-  Receipt, 
-  History as HistoryIcon,
-  Building2
-} from 'lucide-react'
-
-function Header() {
-  const navigate = useNavigate()
-  const location = useLocation()
-
-  const navItems = [
-    { name: 'Home', path: '/', icon: Building2 },
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Accounts', path: '/accounts', icon: Wallet },
-    { name: 'Transfer', path: '/transfer', icon: ArrowLeftRight },
-    { name: 'Transactions', path: '/transactions', icon: Receipt },
-    { name: 'History', path: '/history', icon: HistoryIcon },
-  ]
-
-  return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div 
-            className="flex items-center gap-3 cursor-pointer group"
-            onClick={() => navigate('/')}
-          >
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-2 rounded-lg group-hover:shadow-lg transition-all">
-              <Building2 className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Royal Mint</h1>
-              <p className="text-xs text-gray-500">Online Banking</p>
-            </div>
-          </div>
-
-          {/* Navigation - Only show when signed in */}
-          <SignedIn>
-            <nav className="hidden lg:flex items-center gap-1">
-              {navItems.map((item) => {
-                const Icon = item.icon
-                const isActive = location.pathname === item.path
-                return (
-                  <Button
-                    key={item.path}
-                    variant="ghost"
-                    className={`gap-2 ${
-                      isActive 
-                        ? 'bg-blue-50 text-blue-700 font-semibold' 
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
-                    onClick={() => navigate(item.path)}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {item.name}
-                  </Button>
-                )
-              })}
-            </nav>
-          </SignedIn>
-
-          {/* Auth Buttons */}
-          <div className="flex gap-3 items-center">
-            <SignedOut>
-              <SignInButton mode="modal">
-                <Button variant="ghost" className="text-gray-700">
-                  Sign In
-                </Button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  Get Started
-                </Button>
-              </SignUpButton>
-            </SignedOut>
-            <SignedIn>
-              <UserButton 
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    avatarBox: "w-10 h-10 ring-2 ring-gray-200 hover:ring-blue-500 transition-all"
-                  }
-                }}
-              />
-            </SignedIn>
-          </div>
-        </div>
-      </div>
-    </header>
-  )
-}
+import { Layout } from './components/Layout'
+import { Building2 } from 'lucide-react'
 
 function App() {
   useSyncUserToDatabase()
@@ -111,9 +18,18 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20">
-        <Header />
-        <main className="max-w-7xl mx-auto px-6 py-8">
-          <SignedOut>
+        {/* Signed Out - Welcome Page */}
+        <SignedOut>
+          <div className="w-full px-6 py-8 max-w-7xl mx-auto">
+            <div className="mb-8 flex items-center gap-3">
+              <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-2 rounded-lg">
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Royal Mint</h1>
+                <p className="text-xs text-gray-500">Online Banking</p>
+              </div>
+            </div>
             <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
               <div className="text-center space-y-6 max-w-3xl">
                 <div className="inline-block p-4 bg-blue-100 rounded-2xl mb-4">
@@ -154,9 +70,12 @@ function App() {
                 </div>
               </div>
             </div>
-          </SignedOut>
+          </div>
+        </SignedOut>
 
-          <SignedIn>
+        {/* Signed In - Dashboard with Layout */}
+        <SignedIn>
+          <Layout>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/dashboard" element={<Dashboard />} />
@@ -165,8 +84,8 @@ function App() {
               <Route path="/transfer" element={<Transfer />} />
               <Route path="/history" element={<History />} />
             </Routes>
-          </SignedIn>
-        </main>
+          </Layout>
+        </SignedIn>
       </div>
     </Router>
   )

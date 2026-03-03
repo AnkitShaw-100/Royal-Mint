@@ -167,54 +167,7 @@ function Home() {
         })}
       </div>
 
-      {/* Quick Actions Card */}
-      <Card className="bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-50 border-blue-200 shadow-xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">Quick Actions</CardTitle>
-          <CardDescription className="text-base">
-            Access frequently used features instantly
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <Button 
-              onClick={() => navigate('/transfer')}
-              size="lg"
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all"
-            >
-              <ArrowLeftRight className="w-5 h-5 mr-2" />
-              Quick Transfer
-            </Button>
-            <Button 
-              onClick={() => navigate('/accounts')}
-              size="lg"
-              variant="outline"
-              className="border-2 border-blue-300 hover:bg-blue-50 hover:border-blue-400"
-            >
-              <Wallet className="w-5 h-5 mr-2" />
-              View Accounts
-            </Button>
-            <Button 
-              onClick={() => navigate('/history')}
-              size="lg"
-              variant="outline"
-              className="border-2 border-blue-300 hover:bg-blue-50 hover:border-blue-400"
-            >
-              <History className="w-5 h-5 mr-2" />
-              Transaction History
-            </Button>
-            <Button 
-              onClick={() => navigate('/dashboard')}
-              size="lg"
-              variant="outline"
-              className="border-2 border-blue-300 hover:bg-blue-50 hover:border-blue-400"
-            >
-              <LayoutDashboard className="w-5 h-5 mr-2" />
-              Dashboard
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 }
