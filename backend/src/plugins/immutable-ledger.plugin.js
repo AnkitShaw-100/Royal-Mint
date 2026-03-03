@@ -5,18 +5,7 @@ function immutableLedgerPlugin(schema) {
     return raw === "true" || raw === "1";
   };
 
-  const preventLedgerModification = function (next) {
-    if (!shouldEnforce()) {
-      return next();
-    }
-
-    return next(
-      new Error(
-        "Ledger entries are immutable. Create reversal entries instead of update/delete."
-      )
-    );
-  };
-
+  // Block update and delete operations
   const blockedQueryOps = [
     "findOneAndUpdate",
     "updateOne",
@@ -28,23 +17,22 @@ function immutableLedgerPlugin(schema) {
   ];
 
   blockedQueryOps.forEach((operation) => {
-    schema.pre(operation, preventLedgerModification);
+    schema.pre(operation, async function () {
+      if (shouldEnforce()) {
+        throw new Error(
+          "Ledger entries are immutable. Create reversal entries instead of update/delete."
+        );
+      }
+    });
   });
 
-  schema.pre("save", function (next) {
-    if (!shouldEnforce()) {
-      return next();
-    }
-
-    if (!this.isNew) {
-      return next(
-        new Error(
-          "Ledger entries are immutable. Create reversal entries instead of update/delete."
-        )
+  // Block updates on existing documents
+  schema.pre("save", async function () {
+    if (shouldEnforce() && !this.isNew) {
+      throw new Error(
+        "Ledger entries are immutable. Create reversal entries instead of update/delete."
       );
     }
-
-    return next();
   });
 }
 

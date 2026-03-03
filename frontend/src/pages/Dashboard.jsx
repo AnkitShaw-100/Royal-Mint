@@ -14,45 +14,90 @@ import {
   Wallet,
   Receipt,
   ArrowLeftRight,
-  History as HistoryIcon
+  History as HistoryIcon,
+  Loader2
 } from 'lucide-react';
+import { accountAPI, transactionAPI, formatCurrency, formatDate, formatTime } from '@/services/apiService';
 
 function Dashboard() {
   const navigate = useNavigate();
   const { user } = useUser();
+  const [accounts, setAccounts] = React.useState([]);
+  const [transactions, setTransactions] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [totalBalance, setTotalBalance] = React.useState(0);
+  const [error, setError] = React.useState(null);
+
+  // Fetch accounts and transactions
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch all accounts
+        const accountsResponse = await accountAPI.getUserAccounts(user.id);
+        setAccounts(accountsResponse.accounts || []);
+
+        // Fetch user transactions
+        const transactionsResponse = await transactionAPI.getUserTransactions(user.id);
+        const allTransactions = transactionsResponse.transactions || [];
+        setTransactions(allTransactions.slice(0, 3)); // Show 3 recent
+
+        // Calculate total balance from all accounts
+        let total = 0;
+        if (accountsResponse.accounts) {
+          for (const account of accountsResponse.accounts) {
+            const balanceResponse = await accountAPI.getAccountBalance(account._id, user.id);
+            total += parseFloat(balanceResponse.balance.balance || 0);
+          }
+        }
+        setTotalBalance(total);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.id) {
+      fetchData();
+    }
+  }, [user?.id]);
 
   const stats = [
     {
       title: 'Total Balance',
-      value: '$12,345.67',
-      change: '+12.5%',
+      value: formatCurrency(totalBalance),
+      change: '+0%',
       trend: 'up',
       icon: Wallet,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
     },
     {
-      title: 'Income',
-      value: '$8,432.90',
-      change: '+8.2%',
+      title: 'Active Accounts',
+      value: accounts.filter(a => a.status === 'ACTIVE').length.toString(),
+      change: accounts.length > 0 ? '+0%' : '0',
       trend: 'up',
-      icon: ArrowDownLeft,
+      icon: CreditCard,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
     },
     {
-      title: 'Expenses',
-      value: '$3,210.45',
-      change: '-4.3%',
-      trend: 'down',
+      title: 'Recent Transactions',
+      value: transactions.length.toString(),
+      change: '+0%',
+      trend: 'up',
       icon: ArrowUpRight,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
     },
     {
-      title: 'Savings',
-      value: '$5,222.22',
-      change: '+15.8%',
+      title: 'Account Status',
+      value: accounts.length > 0 ? 'Healthy' : 'No Accounts',
+      change: '+0%',
       trend: 'up',
       icon: TrendingUp,
       color: 'text-purple-600',
@@ -85,12 +130,6 @@ function Dashboard() {
       path: '/history',
       icon: HistoryIcon,
     },
-  ];
-
-  const recentTransactions = [
-    { name: 'Coffee Shop', amount: '-$4.50', date: 'Today', type: 'expense' },
-    { name: 'Salary Deposit', amount: '+$3,200.00', date: 'Yesterday', type: 'income' },
-    { name: 'Grocery Store', amount: '-$87.32', date: '2 days ago', type: 'expense' },
   ];
 
   return (
@@ -202,39 +241,49 @@ function Dashboard() {
             <CardDescription>Your latest activity</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentTransactions.map((transaction, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className={`${
-                      transaction.type === 'income' ? 'bg-green-50' : 'bg-red-50'
-                    } p-2 rounded-full`}>
-                      {transaction.type === 'income' ? (
-                        <ArrowDownLeft className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <ArrowUpRight className="w-4 h-4 text-red-600" />
-                      )}
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+              </div>
+            ) : transactions.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No transactions yet</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {transactions.map((transaction, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className={`${
+                        transaction.status === 'COMPLETED' && transaction.amount > 0 ? 'bg-green-50' : 'bg-red-50'
+                      } p-2 rounded-full`}>
+                        {transaction.amount > 0 ? (
+                          <ArrowDownLeft className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <ArrowUpRight className="w-4 h-4 text-red-600" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium">
+                          {transaction.amount > 0 ? 'Received' : 'Sent'} {formatCurrency(Math.abs(transaction.amount))}
+                        </p>
+                        <p className="text-sm text-gray-500">{formatDate(transaction.createdAt)}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{transaction.name}</p>
-                      <p className="text-sm text-gray-500">{transaction.date}</p>
-                    </div>
+                    <Badge variant={transaction.status === 'COMPLETED' ? 'default' : 'secondary'}>
+                      {transaction.status}
+                    </Badge>
                   </div>
-                  <span className={`font-semibold ${
-                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {transaction.amount}
-                  </span>
-                </div>
-              ))}
-              <Button 
-                variant="ghost" 
-                className="w-full mt-4"
-                onClick={() => navigate('/history')}
-              >
-                View All Transactions
-              </Button>
-            </div>
+                ))}
+                <Button 
+                  variant="ghost" 
+                  className="w-full mt-4"
+                  onClick={() => navigate('/history')}
+                >
+                  View All Transactions
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
