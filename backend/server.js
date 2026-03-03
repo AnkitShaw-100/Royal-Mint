@@ -1,16 +1,24 @@
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import connectDB from "./src/config/db.js";
-import authRouter from "./src/routes/auth.routes.js";
+import userRouter from "./src/routes/user.routes.js";
 
 dotenv.config();
 
 const app = express();
 
+// Middleware
+app.use(cors({
+  origin: ["http://localhost:5173", "http://localhost:5174"],
+  credentials: true,
+}));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Connect to MongoDB
 await connectDB();
 
 app.get("/", (req, res) => {
@@ -18,7 +26,7 @@ app.get("/", (req, res) => {
 });
 
 // Routes
-app.use("/api/auth", authRouter);
+app.use("/api/users", userRouter);
 
 const PORT = process.env.PORT || 5000;
 
