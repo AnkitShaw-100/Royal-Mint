@@ -1,5 +1,7 @@
 import accountModel from "../models/account.model.js";
 import userModel from "../models/user.model.js";
+import ledgerModel from "../models/ledger.model.js";
+import mongoose from "mongoose";
 
 // Create new account for user
 async function createAccountController(req, res) {
@@ -179,7 +181,7 @@ async function updateAccountStatusController(req, res) {
   }
 }
 
-// Get account balance (placeholder for balance logic)
+// Get account balance (calculated from ledger)
 async function getUserBalanceController(req, res) {
   try {
     const { accountId } = req.params;
@@ -206,12 +208,42 @@ async function getUserBalanceController(req, res) {
       });
     }
 
-    // For now, return mock balance data
-    // In real app, this would query transactions table and calculate balance
+    // Calculate balance from ledger entries using aggregation
+    const ledgerAggregation = await ledgerModel.aggregate([
+      {
+        $match: {
+          account: new mongoose.Types.ObjectId(accountId),
+        },
+      },
+      {
+        $group: {
+          _id: "$account",
+          totalDebits: {
+            $sum: {
+              $cond: [{ $eq: ["$direction", "DEBIT"] }, "$amount", 0],
+            },
+          },
+          totalCredits: {
+            $sum: {
+              $cond: [{ $eq: ["$direction", "CREDIT"] }, "$amount", 0],
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          balance: { $subtract: ["$totalCredits", "$totalDebits"] },
+        },
+      },
+    ]);
+
+    const calculatedBalance = ledgerAggregation[0]?.balance ?? 0;
+
     const balance = {
       accountId: account._id,
       currency: account.currency,
-      balance: 10000.00, // Mock balance
+      balance: Number(calculatedBalance).toFixed(2),
       lastUpdated: new Date(),
     };
 
