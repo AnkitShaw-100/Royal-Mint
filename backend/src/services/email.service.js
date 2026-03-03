@@ -1,7 +1,48 @@
+import https from "https";
+
+function postJson(urlString, payload) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(urlString);
+
+    const req = https.request(
+      {
+        method: "POST",
+        hostname: url.hostname,
+        path: `${url.pathname}${url.search}`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+      (res) => {
+        let body = "";
+        res.on("data", (chunk) => {
+          body += chunk;
+        });
+        res.on("end", () => {
+          resolve({
+            ok: res.statusCode >= 200 && res.statusCode < 300,
+            status: res.statusCode,
+            body,
+          });
+        });
+      }
+    );
+
+    req.on("error", reject);
+    req.write(JSON.stringify(payload));
+    req.end();
+  });
+}
+
 // Helper to send email via EmailJS
 async function sendEmail({ templateParams, emailType = "general" }) {
   const serviceId = process.env.EMAILJS_SERVICE_ID;
-  const templateId = process.env.EMAILJS_TEMPLATE_ID;
+  const templateIdByType = {
+    registration: process.env.EMAILJS_TEMPLATE_ID_REGISTRATION,
+    transaction: process.env.EMAILJS_TEMPLATE_ID_TRANSACTION,
+    failed_transaction: process.env.EMAILJS_TEMPLATE_ID_FAILED_TRANSACTION,
+  };
+  const templateId = templateIdByType[emailType] || process.env.EMAILJS_TEMPLATE_ID;
   const publicKey = process.env.EMAILJS_PUBLIC_KEY;
   const privateKey = process.env.EMAILJS_PRIVATE_KEY;
 
@@ -20,12 +61,23 @@ async function sendEmail({ templateParams, emailType = "general" }) {
     };
   }
 
+  const resolvedRecipient =
+    templateParams?.to_email ||
+    templateParams?.to ||
+    templateParams?.email ||
+    templateParams?.user_email ||
+    "";
+
   const payload = {
     service_id: serviceId,
     template_id: templateId,
     user_id: publicKey,
     template_params: {
       ...templateParams,
+      to_email: resolvedRecipient,
+      to: resolvedRecipient,
+      email: resolvedRecipient,
+      user_email: resolvedRecipient,
       sent_at: new Date().toISOString(),
     },
   };
@@ -35,17 +87,39 @@ async function sendEmail({ templateParams, emailType = "general" }) {
   }
 
   try {
-    const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    const response = await postJson("https://api.emailjs.com/api/v1.0/email/send", payload);
 
     if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`EmailJS send failed (${response.status}): ${errorBody}`);
+      if (
+        response.status === 403 &&
+        typeof response.body === "string" &&
+        response.body.toLowerCase().includes("non-browser applications")
+      ) {
+        console.warn(
+          `Skipping ${emailType} email: EmailJS account currently blocks server-side API calls.`
+        );
+        return {
+          delivered: false,
+          skipped: true,
+          reason: "EmailJS blocks server-side API calls for this account",
+        };
+      }
+
+      const responseBody = typeof response.body === "string" ? response.body.trim() : "";
+      const compactDetails = responseBody.length > 400 ? `${responseBody.slice(0, 400)}...` : responseBody;
+
+      console.warn(`Skipping ${emailType} email: EmailJS send failed (${response.status})`, {
+        templateId,
+        serviceId,
+        to: templateParams?.to_email,
+        details: compactDetails || "No response body",
+      });
+      return {
+        delivered: false,
+        skipped: true,
+        reason: `EmailJS send failed (${response.status})`,
+        details: responseBody,
+      };
     }
 
     console.log(`${emailType} email sent successfully`, {
@@ -56,9 +130,10 @@ async function sendEmail({ templateParams, emailType = "general" }) {
       delivered: true,
     };
   } catch (error) {
-    console.error(`Failed to send ${emailType} email:`, error);
+    console.warn(`Skipping ${emailType} email due to provider/network error: ${error.message}`);
     return {
       delivered: false,
+      skipped: true,
       error: error.message,
     };
   }
@@ -101,7 +176,9 @@ async function sendTransactionNotification({
     to_name: to,
     from_name: fromName,
     reply_to: replyTo,
+    transactionId: String(transactionId),
     transaction_id: String(transactionId),
+    amountValue: Number(amount).toFixed(2),
     amount: Number(amount).toFixed(2),
     currency,
     status,
@@ -132,7 +209,9 @@ async function sendFailedTransactionNotification({
     to_name: to,
     from_name: fromName,
     reply_to: replyTo,
+    transactionId: String(transactionId || "N/A"),
     transaction_id: String(transactionId || "N/A"),
+    amountValue: Number(amount).toFixed(2),
     amount: Number(amount).toFixed(2),
     currency,
     status: "FAILED",

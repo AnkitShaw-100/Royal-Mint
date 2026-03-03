@@ -205,14 +205,18 @@ async function createTransactionController(req, res) {
       { path: "toAccount", populate: { path: "user", select: "email firstName lastName" } },
     ]);
 
-    // Step 10: Send email notification
-    await sendTransactionNotification({
-      to: req.user.email,
-      transactionId: populatedTransaction._id,
-      amount: populatedTransaction.amount,
-      currency: fromAccountDoc.currency,
-      status: populatedTransaction.status,
-    });
+    // Step 10: Send email notification (non-blocking for transaction success)
+    try {
+      await sendTransactionNotification({
+        to: req.user.email,
+        transactionId: populatedTransaction._id,
+        amount: populatedTransaction.amount,
+        currency: fromAccountDoc.currency,
+        status: populatedTransaction.status,
+      });
+    } catch (emailError) {
+      console.warn("Transaction created but notification email failed:", emailError.message);
+    }
 
     res.status(201).json({
       status: "success",
@@ -224,13 +228,17 @@ async function createTransactionController(req, res) {
 
     // Send failed transaction notification
     if (req.user?.email) {
-      await sendFailedTransactionNotification({
-        to: req.user.email,
-        transactionId: null,
-        amount: req.body.amount || 0,
-        currency: "INR",
-        reason: error.message || "Transaction processing failed",
-      });
+      try {
+        await sendFailedTransactionNotification({
+          to: req.user.email,
+          transactionId: null,
+          amount: req.body.amount || 0,
+          currency: "INR",
+          reason: error.message || "Transaction processing failed",
+        });
+      } catch (emailError) {
+        console.warn("Failed transaction notification email could not be sent:", emailError.message);
+      }
     }
 
     if (error?.code === 11000) {

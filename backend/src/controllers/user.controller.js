@@ -46,11 +46,15 @@ async function saveOrUpdateUserController(req, res) {
 
     // Send registration email for new users only
     if (isNewUser) {
-      await sendRegistrationEmail({
-        to: email,
-        firstName: firstName || "",
-        lastName: lastName || "",
-      });
+      try {
+        await sendRegistrationEmail({
+          to: email,
+          firstName: firstName || "",
+          lastName: lastName || "",
+        });
+      } catch (emailError) {
+        console.warn("User saved but registration email failed:", emailError.message);
+      }
     }
 
     res.status(201).json({
