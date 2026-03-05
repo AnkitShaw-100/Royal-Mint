@@ -27,6 +27,7 @@ function Accounts() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [copiedAccountId, setCopiedAccountId] = React.useState(null);
+  const [creatingAccount, setCreatingAccount] = React.useState(false);
 
   // Fetch accounts and balances
   React.useEffect(() => {
@@ -70,6 +71,48 @@ function Accounts() {
     setTimeout(() => setCopiedAccountId(null), 2000);
   };
 
+  const handleCreateAccount = async () => {
+    try {
+      setCreatingAccount(true);
+      setError(null);
+
+      await accountAPI.createAccount(
+        {
+          currency: 'INR',
+          status: 'ACTIVE',
+        },
+        user.id
+      );
+
+      toast.success('Account created successfully!');
+      
+      // Refresh the accounts list
+      const accountsResponse = await accountAPI.getUserAccounts(user.id);
+      const userAccounts = accountsResponse.accounts || [];
+      setAccounts(userAccounts);
+
+      // Fetch balance for the new account
+      if (userAccounts.length > 0) {
+        const balances = {};
+        for (const account of userAccounts) {
+          try {
+            const balanceResponse = await accountAPI.getAccountBalance(account._id, user.id);
+            balances[account._id] = parseFloat(balanceResponse.balance.balance);
+          } catch {
+            balances[account._id] = 0;
+          }
+        }
+        setAccountBalances(balances);
+      }
+    } catch (err) {
+      console.error('Error creating account:', err);
+      setError(err.message || 'Failed to create account');
+      toast.error('Failed to create account');
+    } finally {
+      setCreatingAccount(false);
+    }
+  };
+
   const getAccountIcon = (status) => {
     if (status === 'ACTIVE') return Wallet;
     return CreditCard;
@@ -100,10 +143,29 @@ function Accounts() {
           </div>
         ) : accounts.length === 0 ? (
           <Card className="text-center py-12">
-            <CardContent>
-              <Wallet className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-4 text-lg">No accounts yet</p>
-              <p className="text-sm text-gray-400">Contact admin to create an account</p>
+            <CardContent className="space-y-4">
+              <Wallet className="w-12 h-12 text-gray-400 mx-auto" />
+              <div>
+                <p className="text-gray-500 mb-2 text-lg font-medium">No accounts yet</p>
+                <p className="text-sm text-gray-400 mb-6">Create your first account to get started</p>
+              </div>
+              <Button
+                onClick={handleCreateAccount}
+                disabled={creatingAccount}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {creatingAccount ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  <>
+                    <Wallet className="w-4 h-4 mr-2" />
+                    Create Account
+                  </>
+                )}
+              </Button>
             </CardContent>
           </Card>
         ) : (

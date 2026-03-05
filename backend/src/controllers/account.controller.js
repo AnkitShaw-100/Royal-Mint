@@ -14,9 +14,15 @@ async function createAccountController(req, res) {
     // Check if user already has account
     const existingAccount = await accountModel.findOne({ user: userId });
     if (existingAccount) {
-      return res.status(400).json({
-        status: "failed",
-        message: "User already has an account",
+      // Return existing account instead of error
+      const populatedAccount = await existingAccount.populate("user", "email firstName lastName profileImage");
+      console.log("User already has an account, returning existing:", existingAccount._id);
+      
+      return res.status(200).json({
+        status: "success",
+        message: "Account already exists",
+        account: populatedAccount,
+        alreadyExists: true,
       });
     }
 
@@ -59,20 +65,13 @@ async function getUserAccountsController(req, res) {
       .populate("user", "email firstName lastName profileImage")
       .sort({ createdAt: -1 });
 
-    if (!accounts || accounts.length === 0) {
-      return res.status(404).json({
-        status: "failed",
-        message: "No accounts found for this user",
-        accounts: [],
-      });
-    }
-
     console.log("Accounts fetched:", accounts.length);
 
+    // Return 200 even if no accounts found - it's a valid state
     res.status(200).json({
       status: "success",
       count: accounts.length,
-      accounts,
+      accounts: accounts || [],
     });
   } catch (error) {
     console.error("Get User Accounts Error:", error);
