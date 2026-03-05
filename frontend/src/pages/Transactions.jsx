@@ -29,7 +29,8 @@ import {
   ShoppingBag,
   Home as HomeIcon,
   Car,
-  Utensils
+  Utensils,
+  ArrowLeft
 } from 'lucide-react';
 
 function Transactions() {
@@ -145,7 +146,14 @@ function Transactions() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8 space-y-6">
+        {/* Back Button */}
+        <Button variant="ghost" className="mb-4" onClick={() => navigate(-1)}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -305,6 +313,7 @@ function Transactions() {
           </Table>
         </CardContent>
       </Card>
+    </div>
     </div>
   );
 }

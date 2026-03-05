@@ -63,15 +63,24 @@ function Transfer() {
     }
 
     const fromAccount = accounts.find(a => a._id === formData.fromAccount);
-    const toAccount = accounts.find(a => a._id === formData.toAccount);
 
-    if (!fromAccount || !toAccount) {
-      setError('Please select valid accounts');
+    if (!fromAccount) {
+      setError('Please select a valid source account');
       return;
     }
 
-    if (fromAccount.status !== 'ACTIVE' || toAccount.status !== 'ACTIVE') {
-      setError('Both accounts must be active to transfer');
+    if (fromAccount.status !== 'ACTIVE') {
+      setError('Source account must be active to transfer');
+      return;
+    }
+
+    if (parseFloat(formData.amount) <= 0) {
+      setError('Amount must be greater than 0');
+      return;
+    }
+
+    if (fromAccount._id === formData.toAccount) {
+      setError('Cannot transfer to the same account');
       return;
     }
 
@@ -202,29 +211,23 @@ function Transfer() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="toAccount">To Account</Label>
-                <Select
-                  value={formData.toAccount}
-                  onValueChange={(value) => {
-                    setFormData({ ...formData, toAccount: value });
-                    setError(null);
-                  }}
-                  required
-                >
-                  <SelectTrigger id="toAccount">
-                    <SelectValue placeholder="Select recipient account" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {accounts.filter(a => a.status === 'ACTIVE' && a._id !== formData.fromAccount).map((account) => (
-                      <SelectItem key={account._id} value={account._id}>
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4" />
-                          {account.user?.firstName || 'Account'}'s {account.currency} account
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="toAccount">Recipient Account ID</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                  <Input
+                    id="toAccount"
+                    type="text"
+                    value={formData.toAccount}
+                    onChange={(e) => {
+                      setFormData({ ...formData, toAccount: e.target.value });
+                      setError(null);
+                    }}
+                    placeholder="Enter recipient account ID"
+                    className="pl-10 font-mono"
+                    required
+                  />
+                </div>
+                <p className="text-xs text-gray-500">Paste the recipient's account ID from their profile</p>
               </div>
 
               <div className="space-y-2">

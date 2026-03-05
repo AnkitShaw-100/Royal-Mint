@@ -1,4 +1,6 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 import {
   Card,
   CardContent,
@@ -8,141 +10,153 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Download,
-  CalendarIcon,
   TrendingUp,
   TrendingDown,
   ArrowDownLeft,
-  Coffee,
-  ShoppingBag,
-  Home as HomeIcon,
-  Car,
-  Utensils,
+  ArrowUpRight,
+  Loader2,
+  AlertCircle,
+  Eye,
+  ArrowLeft,
 } from "lucide-react";
-import { format } from "date-fns";
+import { transactionAPI, formatCurrency, formatDate, formatTime } from "@/services/apiService";
+import { toast } from "sonner";
 
 function History() {
-  const [date, setDate] = React.useState(new Date());
+  const navigate = useNavigate();
+  const { user } = useUser();
+  const [transactions, setTransactions] = React.useState([]);
+  const [filteredTransactions, setFilteredTransactions] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+  const [selectedStatus, setSelectedStatus] = React.useState("ALL");
+  const [searchQuery, setSearchQuery] = React.useState("");
 
-  const historyByMonth = {
-    "March 2026": [
-      {
-        id: "TXN001",
-        name: "Starbucks Coffee",
-        category: "Food & Dining",
-        date: "2026-03-03",
-        time: "09:30 AM",
-        amount: -4.5,
-        status: "completed",
-        type: "expense",
-        icon: Coffee,
-      },
-      {
-        id: "TXN002",
-        name: "Salary Deposit",
-        category: "Income",
-        date: "2026-03-02",
-        time: "12:00 PM",
-        amount: 3200.0,
-        status: "completed",
-        type: "income",
-        icon: ArrowDownLeft,
-      },
-      {
-        id: "TXN003",
-        name: "Amazon Purchase",
-        category: "Shopping",
-        date: "2026-03-01",
-        time: "03:45 PM",
-        amount: -87.32,
-        status: "completed",
-        type: "expense",
-        icon: ShoppingBag,
-      },
-      {
-        id: "TXN004",
-        name: "Electric Bill",
-        category: "Utilities",
-        date: "2026-03-01",
-        time: "10:15 AM",
-        amount: -125.5,
-        status: "completed",
-        type: "expense",
-        icon: HomeIcon,
-      },
-    ],
-    "February 2026": [
-      {
-        id: "TXN005",
-        name: "Restaurant",
-        category: "Food & Dining",
-        date: "2026-02-28",
-        time: "07:30 PM",
-        amount: -65.8,
-        status: "completed",
-        type: "expense",
-        icon: Utensils,
-      },
-      {
-        id: "TXN006",
-        name: "Gas Station",
-        category: "Transportation",
-        date: "2026-02-28",
-        time: "08:00 AM",
-        amount: -45.0,
-        status: "completed",
-        type: "expense",
-        icon: Car,
-      },
-      {
-        id: "TXN007",
-        name: "Freelance Payment",
-        category: "Income",
-        date: "2026-02-27",
-        time: "02:00 PM",
-        amount: 850.0,
-        status: "completed",
-        type: "income",
-        icon: ArrowDownLeft,
-      },
-      {
-        id: "TXN008",
-        name: "Grocery Store",
-        category: "Shopping",
-        date: "2026-02-26",
-        time: "11:20 AM",
-        amount: -156.42,
-        status: "completed",
-        type: "expense",
-        icon: ShoppingBag,
-      },
-    ],
+  // Fetch transactions
+  React.useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await transactionAPI.getUserTransactions(user.id);
+        const allTransactions = response.transactions || [];
+        setTransactions(allTransactions);
+        filterTransactions(allTransactions, selectedStatus, searchQuery);
+      } catch (err) {
+        console.error("Error fetching transactions:", err);
+        setError(err.message);
+        toast.error("Failed to load transaction history");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.id) {
+      fetchTransactions();
+    }
+  }, [user?.id]);
+
+  // Filter transactions
+  const filterTransactions = (txns, status, query) => {
+    let filtered = txns;
+
+    if (status !== "ALL") {
+      filtered = filtered.filter((t) => t.status === status);
+    }
+
+    if (query) {
+      filtered = filtered.filter(
+        (t) =>
+          t._id?.toLowerCase().includes(query.toLowerCase()) ||
+          t.description?.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+
+    setFilteredTransactions(filtered);
   };
 
-  const calculateMonthStats = (transactions) => {
-    const income = transactions
-      .filter((t) => t.type === "income")
-      .reduce((sum, t) => sum + t.amount, 0);
+  const handleStatusChange = (status) => {
+    setSelectedStatus(status);
+    filterTransactions(transactions, status, searchQuery);
+  };
 
-    const expenses = Math.abs(
-      transactions
-        .filter((t) => t.type === "expense")
-        .reduce((sum, t) => sum + t.amount, 0)
+  const handleSearchChange = (query) => {
+    setSearchQuery(query);
+    filterTransactions(transactions, selectedStatus, query);
+  };
+
+  // Group transactions by date
+  const groupTransactionsByDate = (txns) => {
+    const grouped = {};
+    txns.forEach((t) => {
+      const date = formatDate(t.createdAt);
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(t);
+    });
+    return grouped;
+  };
+
+  // Calculate statistics
+  const calculateStats = (txns) => {
+    let totalIn = 0;
+    let totalOut = 0;
+    let completedCount = 0;
+
+    txns.forEach((t) => {
+      const amount = parseFloat(t.amount);
+      if (t.status === "COMPLETED") completedCount++;
+      // Simplified - assuming if user is receiving money it's credit
+      if (t.toAccount === user.id) {
+        totalIn += amount;
+      } else {
+        totalOut += amount;
+      }
+    });
+
+    return {
+      totalIn,
+      totalOut,
+      net: totalIn - totalOut,
+      completedCount,
+      totalCount: txns.length,
+    };
+  };
+
+  const stats = calculateStats(filteredTransactions);
+  const groupedTransactions = groupTransactionsByDate(filteredTransactions);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="space-y-4 text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
+          <p className="text-gray-600">Loading transaction history...</p>
+        </div>
+      </div>
     );
-
-    return { income, expenses, net: income - expenses };
-  };
+  }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8 space-y-6">
+        {/* Back Button */}
+        <Button variant="ghost" className="mb-4" onClick={() => navigate(-1)}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -150,290 +164,239 @@ function History() {
             Transaction History
           </h1>
           <p className="text-gray-600 mt-1">
-            View your complete financial history
+            View and manage all your transactions
           </p>
         </div>
-        <div className="flex gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <CalendarIcon className="w-4 h-4" />
-                {format(date, "MMM dd, yyyy")}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-          <Button variant="outline" className="gap-2">
-            <Download className="w-4 h-4" />
-            Export
-          </Button>
-        </div>
+        <Button variant="outline" className="gap-2">
+          <Download className="w-4 h-4" />
+          Export
+        </Button>
       </div>
 
-      {/* Tabs for different views */}
-      <Tabs defaultValue="all" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="income">Income</TabsTrigger>
-          <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-        </TabsList>
-
-        {/* All Transactions */}
-        <TabsContent value="all" className="space-y-6">
-          {Object.entries(historyByMonth).map(([month, transactions]) => {
-            const stats = calculateMonthStats(transactions);
-
-            return (
-              <div key={month} className="space-y-4">
-                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-2xl">{month}</CardTitle>
-                        <CardDescription className="text-base">
-                          {transactions.length} transactions
-                        </CardDescription>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm text-gray-600">Net Balance</div>
-                        <div
-                          className={`text-2xl font-bold ${
-                            stats.net >= 0 ? "text-green-600" : "text-red-600"
-                          }`}
-                        >
-                          $
-                          {Math.abs(stats.net).toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4 text-green-600" />
-                        <div>
-                          <div className="text-xs text-gray-600">Income</div>
-                          <div className="font-semibold text-green-600">
-                            $
-                            {stats.income.toLocaleString("en-US", {
-                              minimumFractionDigits: 2,
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <TrendingDown className="w-4 h-4 text-red-600" />
-                        <div>
-                          <div className="text-xs text-gray-600">Expenses</div>
-                          <div className="font-semibold text-red-600">
-                            $
-                            {stats.expenses.toLocaleString("en-US", {
-                              minimumFractionDigits: 2,
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      {transactions.map((transaction) => {
-                        const Icon = transaction.icon;
-                        return (
-                          <div
-                            key={transaction.id}
-                            className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors border"
-                          >
-                            <div className="flex items-center gap-4">
-                              <div
-                                className={`${
-                                  transaction.type === "income"
-                                    ? "bg-green-50"
-                                    : "bg-red-50"
-                                } p-3 rounded-lg`}
-                              >
-                                <Icon
-                                  className={`w-5 h-5 ${
-                                    transaction.type === "income"
-                                      ? "text-green-600"
-                                      : "text-red-600"
-                                  }`}
-                                />
-                              </div>
-                              <div>
-                                <p className="font-semibold">
-                                  {transaction.name}
-                                </p>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <Badge variant="outline" className="text-xs">
-                                    {transaction.category}
-                                  </Badge>
-                                  <span className="text-sm text-gray-500">
-                                    {transaction.date} • {transaction.time}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p
-                                className={`text-xl font-bold ${
-                                  transaction.type === "income"
-                                    ? "text-green-600"
-                                    : "text-red-600"
-                                }`}
-                              >
-                                {transaction.amount > 0 ? "+" : ""}$
-                                {Math.abs(transaction.amount).toLocaleString(
-                                  "en-US",
-                                  { minimumFractionDigits: 2 }
-                                )}
-                              </p>
-                              <Badge
-                                variant="outline"
-                                className="mt-1 text-green-600 border-green-600"
-                              >
-                                {transaction.status}
-                              </Badge>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            );
-          })}
-        </TabsContent>
-
-        {/* Income Tab */}
-        <TabsContent value="income" className="space-y-4">
+      {/* Statistics Cards */}
+      {filteredTransactions.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Income History</CardTitle>
-              <CardDescription>All your income transactions</CardDescription>
+            <CardHeader className="pb-3">
+              <CardDescription className="flex items-center gap-1">
+                <TrendingUp className="w-4 h-4 text-green-600" />
+                Money In
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-gray-600">
-                Filtered income transactions will appear here
+              <div className="text-2xl font-bold text-green-600">
+                {formatCurrency(stats.totalIn)}
               </div>
+              <p className="text-xs text-gray-600 mt-1">
+                Total received
+              </p>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        {/* Expenses Tab */}
-        <TabsContent value="expenses" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Expense History</CardTitle>
-              <CardDescription>All your expense transactions</CardDescription>
+            <CardHeader className="pb-3">
+              <CardDescription className="flex items-center gap-1">
+                <TrendingDown className="w-4 h-4 text-red-600" />
+                Money Out
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-gray-600">
-                Filtered expense transactions will appear here
+              <div className="text-2xl font-bold text-red-600">
+                {formatCurrency(stats.totalOut)}
               </div>
+              <p className="text-xs text-gray-600 mt-1">
+                Total sent
+              </p>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        {/* Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Total Transactions</CardDescription>
-                <CardTitle className="text-3xl">12</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">Last 2 months</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Average Transaction</CardDescription>
-                <CardTitle className="text-3xl">$432.10</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">Per transaction</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Most Frequent Category</CardDescription>
-                <CardTitle className="text-2xl">Food & Dining</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">25% of expenses</p>
-              </CardContent>
-            </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardDescription>Net Change</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${stats.net >= 0 ? "text-green-600" : "text-red-600"}`}>
+                {formatCurrency(stats.net)}
+              </div>
+              <p className="text-xs text-gray-600 mt-1">
+                Balance change
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardDescription>Completed</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {stats.completedCount}/{stats.totalCount}
+              </div>
+              <p className="text-xs text-gray-600 mt-1">
+                Successful transactions
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters & Search</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold">Status</label>
+              <Select value={selectedStatus} onValueChange={handleStatusChange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Transactions</SelectItem>
+                  <SelectItem value="COMPLETED">Completed</SelectItem>
+                  <SelectItem value="PENDING">Pending</SelectItem>
+                  <SelectItem value="FAILED">Failed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-semibold">Search</label>
+              <Input
+                placeholder="Search by ID or description..."
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+              />
+            </div>
           </div>
+        </CardContent>
+      </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Spending by Category</CardTitle>
-              <CardDescription>Your top spending categories</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  {
-                    category: "Food & Dining",
-                    amount: 156.1,
-                    percentage: 35,
-                    color: "bg-blue-500",
-                  },
-                  {
-                    category: "Shopping",
-                    amount: 243.74,
-                    percentage: 55,
-                    color: "bg-purple-500",
-                  },
-                  {
-                    category: "Utilities",
-                    amount: 125.5,
-                    percentage: 28,
-                    color: "bg-orange-500",
-                  },
-                  {
-                    category: "Transportation",
-                    amount: 45.0,
-                    percentage: 10,
-                    color: "bg-green-500",
-                  },
-                ].map((item) => (
-                  <div key={item.category} className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium">{item.category}</span>
-                      <span className="text-gray-600">
-                        ${item.amount.toFixed(2)} ({item.percentage}%)
-                      </span>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full ${item.color}`}
-                        style={{ width: `${item.percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+      {/* Transactions List */}
+      {filteredTransactions.length > 0 ? (
+        <div className="space-y-4">
+          {Object.entries(groupedTransactions).map(([date, dayTransactions]) => (
+            <div key={date} className="space-y-3">
+              <h3 className="text-sm font-semibold text-gray-700 px-2">{date}</h3>
+              <div className="space-y-2">
+                {dayTransactions.map((transaction) => {
+                  const amount = parseFloat(transaction.amount);
+                  const isDebit = transaction.fromAccount === user.id;
+                  const isCredit = transaction.toAccount === user.id;
+
+                  const statusColor = {
+                    PENDING: "bg-yellow-100 text-yellow-800",
+                    COMPLETED: "bg-green-100 text-green-800",
+                    FAILED: "bg-red-100 text-red-800",
+                    CANCELLED: "bg-gray-100 text-gray-800",
+                  };
+
+                  const statusIcon = {
+                    COMPLETED: "✓",
+                    PENDING: "⏱",
+                    FAILED: "✕",
+                    CANCELLED: "—",
+                  };
+
+                  return (
+                    <Card
+                      key={transaction._id}
+                      className="cursor-pointer hover:shadow-md transition-all"
+                      onClick={() => navigate(`/transaction/${transaction._id}`)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 flex-1">
+                            <div
+                              className={`p-3 rounded-full ${
+                                isDebit ? "bg-red-100" : "bg-green-100"
+                              }`}
+                            >
+                              {isDebit ? (
+                                <ArrowUpRight className="w-5 h-5 text-red-600" />
+                              ) : (
+                                <ArrowDownLeft className="w-5 h-5 text-green-600" />
+                              )}
+                            </div>
+
+                            <div className="flex-1">
+                              <p className="font-semibold text-gray-900">
+                                {isDebit ? "Sent to " : "Received from "}
+                                {transaction.description || "Account"}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs text-gray-600 font-mono">
+                                  ID: {transaction._id?.slice(-8)}
+                                </span>
+                                <span className="text-xs text-gray-600">
+                                  {formatTime(transaction.createdAt)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="text-right space-y-2">
+                            <div
+                              className={`text-lg font-bold ${
+                                isDebit ? "text-red-600" : "text-green-600"
+                              }`}
+                            >
+                              {isDebit ? "-" : "+"}{formatCurrency(amount)}
+                            </div>
+                            <Badge className={`${statusColor[transaction.status]}`}>
+                              {statusIcon[transaction.status]} {transaction.status}
+                            </Badge>
+                          </div>
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="ml-4"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/transaction/${transaction._id}`);
+                            }}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Card className="border-2">
+          <CardContent className="pt-12 pb-12 text-center space-y-4">
+            {error ? (
+              <>
+                <AlertCircle className="w-12 h-12 text-red-600 mx-auto" />
+                <h3 className="text-lg font-semibold text-gray-900">Error Loading Transactions</h3>
+                <p className="text-gray-600">{error}</p>
+              </>
+            ) : (
+              <>
+                <ArrowUpRight className="w-12 h-12 text-gray-400 mx-auto" />
+                <h3 className="text-lg font-semibold text-gray-900">No Transactions Found</h3>
+                <p className="text-gray-600">
+                  {selectedStatus !== "ALL" || searchQuery
+                    ? "Try adjusting your filters"
+                    : "Start making transactions to see them here"}
+                </p>
+                <Button onClick={() => navigate("/transfer")}>
+                  Make Your First Transfer
+                </Button>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { SignedIn, SignedOut, SignInButton, SignUpButton } from '@clerk/clerk-react'
+import { SignedIn, SignedOut, SignInButton, SignUpButton, useUser } from '@clerk/clerk-react'
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -8,9 +8,48 @@ import Transactions from './pages/Transactions'
 import Accounts from './pages/Accounts'
 import Transfer from './pages/Transfer'
 import History from './pages/History'
+import Profile from './pages/Profile'
+import AdminPanel from './pages/AdminPanel'
+import TransactionDetail from './pages/TransactionDetail'
 import { useSyncUserToDatabase } from './hooks/useSyncUserToDatabase'
 import { Layout } from './components/Layout'
 import { Building2 } from 'lucide-react'
+
+// Protected Admin Route Component
+function ProtectedAdminRoute({ children }) {
+  const { user } = useUser()
+  const [isAdmin, setIsAdmin] = React.useState(false)
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    if (user) {
+      const isAdminUser = user?.publicMetadata?.role === 'admin'
+      setIsAdmin(isAdminUser)
+      setLoading(false)
+    }
+  }, [user])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold text-gray-900">Access Denied</h2>
+          <p className="text-gray-600">Admin access required</p>
+        </div>
+      </div>
+    )
+  }
+
+  return children
+}
 
 function App() {
   useSyncUserToDatabase()
@@ -75,16 +114,29 @@ function App() {
 
         {/* Signed In - Dashboard with Layout */}
         <SignedIn>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/transactions" element={<Transactions />} />
-              <Route path="/accounts" element={<Accounts />} />
-              <Route path="/transfer" element={<Transfer />} />
-              <Route path="/history" element={<History />} />
-            </Routes>
-          </Layout>
+          <Routes>
+            {/* Routes without navbar (have back buttons) */}
+            <Route path="/accounts" element={<Accounts />} />
+            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/transaction/:id" element={<TransactionDetail />} />
+            
+            {/* Routes with navbar/layout */}
+            <Route path="/" element={<Layout><Home /></Layout>} />
+            <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+            <Route path="/transfer" element={<Layout><Transfer /></Layout>} />
+            <Route 
+              path="/admin" 
+              element={
+                <Layout>
+                  <ProtectedAdminRoute>
+                    <AdminPanel />
+                  </ProtectedAdminRoute>
+                </Layout>
+              } 
+            />
+          </Routes>
         </SignedIn>
       </div>
     </Router>

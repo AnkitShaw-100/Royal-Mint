@@ -1,9 +1,9 @@
-import { Navbar } from './Navbar'
-import { Footer } from './Footer'
+import { Navbar } from "./Navbar";
+import { Footer } from "./Footer";
 
 export function Layout({ children }) {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20">
+    <div className="flex flex-col min-h-screen bg-linear-to-br from-gray-50 via-blue-50/30 to-indigo-50/20">
       {/* Navbar */}
       <Navbar />
 
@@ -15,5 +15,5 @@ export function Layout({ children }) {
       {/* Footer */}
       <Footer />
     </div>
-  )
+  );
 }
