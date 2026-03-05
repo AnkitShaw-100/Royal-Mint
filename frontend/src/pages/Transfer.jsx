@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import {
+  ArrowLeft,
   ArrowRight,
   Wallet,
   User,
@@ -43,7 +44,13 @@ function Transfer() {
     const fetchAccounts = async () => {
       try {
         const response = await accountAPI.getUserAccounts(user.id);
-        setAccounts(response.accounts || []);
+        const loadedAccounts = response.accounts || [];
+        setAccounts(loadedAccounts);
+
+        const firstActiveAccount = loadedAccounts.find((account) => account.status === 'ACTIVE');
+        if (firstActiveAccount) {
+          setFormData((previous) => ({ ...previous, fromAccount: firstActiveAccount._id }));
+        }
       } catch (err) {
         setError('Failed to load accounts: ' + err.message);
       }
@@ -129,228 +136,253 @@ function Transfer() {
   };
 
   const selectedAccount = accounts.find(acc => acc._id === formData.fromAccount);
-  const selectedToAccount = accounts.find(acc => acc._id === formData.toAccount);
-
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-4xl font-bold text-gray-900">Transfer Money</h1>
-        <p className="text-gray-600 mt-1">Send money quickly and securely</p>
-      </div>
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+      <div className="max-w-5xl mx-auto sm:px-6 md:px-8 md:pb-6 md:pt-0 space-y-5">
 
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            {[
-              { num: 1, label: 'Details' },
-              { num: 2, label: 'Review' },
-              { num: 3, label: 'Processing' },
-              { num: 4, label: 'Complete' },
-            ].map((s, idx) => (
-              <React.Fragment key={s.num}>
-                <div className="flex flex-col items-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+          <div className="space-y-1">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">Transfer Money</h1>
+            <p className="text-gray-600">Fast, secure transfer with live validation and clear review.</p>
+          </div>
+        </div>
+
+        <Card className="border-gray-200 shadow-sm">
+          <CardContent className="py-5">
+            <div className="grid grid-cols-4 gap-3 items-center">
+              {[
+                { num: 1, label: 'Details' },
+                { num: 2, label: 'Review' },
+                { num: 3, label: 'Processing' },
+                { num: 4, label: 'Complete' },
+              ].map((s) => (
+                <div key={s.num} className="flex flex-col items-center gap-2">
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold ${
                     step >= s.num ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
                   }`}>
                     {s.num}
                   </div>
-                  <span className="text-xs mt-2 font-medium">{s.label}</span>
+                  <span className="text-xs font-medium text-gray-600">{s.label}</span>
+                  <div className={`h-1 w-full rounded-full ${step > s.num ? 'bg-blue-600' : 'bg-gray-200'}`} />
                 </div>
-                {idx < 3 && (
-                  <div className={`flex-1 h-1 mx-2 ${step > s.num ? 'bg-blue-600' : 'bg-gray-200'}`} />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-      {step === 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Transfer Details</CardTitle>
-            <CardDescription>Enter the transfer information</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600">
-                <AlertCircle className="w-5 h-5 shrink-0" />
-                {error}
-              </div>
-            )}
-            <form onSubmit={handleContinue} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="fromAccount">From Account</Label>
-                <Select
-                  value={formData.fromAccount}
-                  onValueChange={(value) => {
-                    setFormData({ ...formData, fromAccount: value });
-                    setError(null);
-                  }}
-                  required
-                >
-                  <SelectTrigger id="fromAccount">
-                    <SelectValue placeholder="Select source account" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {accounts.filter(a => a.status === 'ACTIVE').map((account) => (
-                      <SelectItem key={account._id} value={account._id}>
-                        <div className="flex items-center gap-2">
-                          <Wallet className="w-4 h-4" />
-                          {account.user?.firstName || 'Account'}'s {account.currency} account
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selectedAccount && (
-                  <p className="text-sm text-gray-600">
-                    Status: <Badge variant="outline" className="ml-1">{selectedAccount.status}</Badge>
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="toAccount">Recipient Account ID</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                  <Input
-                    id="toAccount"
-                    type="text"
-                    value={formData.toAccount}
-                    onChange={(e) => {
-                      setFormData({ ...formData, toAccount: e.target.value });
-                      setError(null);
-                    }}
-                    placeholder="Enter recipient account ID"
-                    className="pl-10 font-mono"
-                    required
-                  />
+        {step === 1 && (
+          <Card className="border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-2xl">Transfer Details</CardTitle>
+              <CardDescription>Fill the details and verify before submission.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {error && (
+                <div className="mb-5 p-3.5 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700 text-sm">
+                  <AlertCircle className="w-5 h-5 shrink-0" />
+                  {error}
                 </div>
-                <p className="text-xs text-gray-500">Paste the recipient's account ID from their profile</p>
-              </div>
+              )}
 
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount</Label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                  <Input
-                    id="amount"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    placeholder="0.00"
-                    className="pl-10"
-                    required
-                  />
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 items-stretch">
+                <form onSubmit={handleContinue} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="fromAccount">From Account</Label>
+                    <Select
+                      value={formData.fromAccount}
+                      onValueChange={(value) => {
+                        setFormData({ ...formData, fromAccount: value });
+                        setError(null);
+                      }}
+                      required
+                    >
+                      <SelectTrigger id="fromAccount" className="bg-white border-gray-200">
+                        <SelectValue placeholder="Select source account" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {accounts.filter(a => a.status === 'ACTIVE').map((account) => (
+                          <SelectItem key={account._id} value={account._id}>
+                            <div className="flex items-center gap-2">
+                              <Wallet className="w-4 h-4" />
+                              {account.user?.firstName || 'Account'}'s {account.currency} account
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="toAccount">Recipient Account ID</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400" />
+                      <Input
+                        id="toAccount"
+                        type="text"
+                        value={formData.toAccount}
+                        onChange={(e) => {
+                          setFormData({ ...formData, toAccount: e.target.value });
+                          setError(null);
+                        }}
+                        placeholder="Enter recipient account ID"
+                        className="pl-10 font-mono bg-white border-gray-200"
+                        required
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">Use the exact recipient account ID to avoid transfer failure.</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="amount">Amount</Label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400" />
+                      <Input
+                        id="amount"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={formData.amount}
+                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                        placeholder="0.00"
+                        className="pl-10 bg-white border-gray-200"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    disabled={!formData.fromAccount || !formData.toAccount || !formData.amount || loading}
+                  >
+                    Continue to Review
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </form>
+
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 flex flex-col h-1/2 lg:min-h-[calc(100vh-560px)]">
+                  <p className="text-sm font-semibold text-gray-900">Transfer Snapshot</p>
+                  <div className="space-y-3 text-sm flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-gray-600">Status</span>
+                      <Badge variant="outline" className="bg-white border-gray-200">Draft</Badge>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-gray-600">From</span>
+                      <span className="font-medium text-right">{selectedAccount?.currency || '---'} Account</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-gray-600">Balance</span>
+                      <span className="font-semibold">{formatCurrency(selectedAccount?.balance || 0)}</span>
+                    </div>
+                    <div className="pt-3 mt-auto border-t border-gray-200 flex items-center justify-between gap-3">
+                      <span className="text-gray-600">Amount</span>
+                      <span className="text-xl font-bold text-blue-600">{formatCurrency(parseFloat(formData.amount || 0))}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {step === 2 && (
+          <Card className="border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-2xl">Review Transfer</CardTitle>
+              <CardDescription>Confirm details before sending funds.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {error && (
+                <div className="p-3.5 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700 text-sm">
+                  <AlertCircle className="w-5 h-5 shrink-0" />
+                  {error}
+                </div>
+              )}
+
+              <div className="rounded-xl border border-gray-200 overflow-hidden">
+                <div className="grid grid-cols-2 bg-gray-50 border-b border-gray-200">
+                  <div className="px-4 py-3 text-sm text-gray-600">From Account</div>
+                  <div className="px-4 py-3 text-sm font-semibold text-gray-900 text-right">{selectedAccount?.user?.firstName || 'Account'}'s {selectedAccount?.currency} account</div>
+                </div>
+                <div className="grid grid-cols-2 border-b border-gray-200">
+                  <div className="px-4 py-3 text-sm text-gray-600">Recipient Account ID</div>
+                  <div className="px-4 py-3 text-sm font-semibold text-gray-900 text-right font-mono">{formData.toAccount}</div>
+                </div>
+                <div className="grid grid-cols-2 bg-blue-50/50">
+                  <div className="px-4 py-3 text-sm text-gray-700">Transfer Amount</div>
+                  <div className="px-4 py-3 text-2xl font-bold text-blue-600 text-right">{formatCurrency(parseFloat(formData.amount || 0))}</div>
                 </div>
               </div>
 
-              <Button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700"
-                disabled={!formData.fromAccount || !formData.toAccount || !formData.amount || loading}
-              >
-                Continue to Review
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button variant="outline" className="sm:flex-1" onClick={() => setStep(1)} disabled={loading}>
+                  Back
+                </Button>
+                <Button className="sm:flex-1 bg-blue-600 hover:bg-blue-700" onClick={handleSubmit} disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : 'Confirm Transfer'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {step === 2 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Review Transfer</CardTitle>
-            <CardDescription>Please verify the details before confirming</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600">
-                <AlertCircle className="w-5 h-5 shrink-0" />
-                {error}
+        {step === 3 && (
+          <Card className="border-gray-200 shadow-sm">
+            <CardContent className="py-14 text-center space-y-3">
+              <div className="flex justify-center">
+                <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center">
+                  <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+                </div>
               </div>
-            )}
-            <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">From</span>
-                <span className="font-semibold">{selectedAccount?.user?.firstName || 'Account'}'s {selectedAccount?.currency} account</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">To</span>
-                <span className="font-semibold">{selectedToAccount?.user?.firstName || 'Account'}'s {selectedToAccount?.currency} account</span>
-              </div>
-              <div className="flex justify-between items-center pt-4 border-t">
-                <span className="text-gray-600">Amount</span>
-                <span className="text-3xl font-bold text-blue-600">{formatCurrency(parseFloat(formData.amount || 0))}</span>
-              </div>
-            </div>
+              <h3 className="text-2xl font-bold text-gray-900">Processing Transfer...</h3>
+              <p className="text-gray-600">Please wait while we securely process your transaction.</p>
+            </CardContent>
+          </Card>
+        )}
 
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={() => setStep(1)} disabled={loading}>
-                Back
-              </Button>
-              <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={handleSubmit} disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : 'Confirm Transfer'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {step === 3 && (
-        <Card>
-          <CardContent className="py-16 text-center">
-            <div className="flex justify-center mb-6">
-              <Loader2 className="w-16 h-16 text-blue-600 animate-spin" />
-            </div>
-            <h3 className="text-2xl font-bold mb-2">Processing Transfer...</h3>
-            <p className="text-gray-600">Please wait while we process your transaction</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {step === 4 && (
-        <Card className="border-green-200">
-          <CardContent className="py-16 text-center">
-            <div className="flex justify-center mb-6">
-              <div className="bg-green-100 p-4 rounded-full">
-                <CheckCircle2 className="w-16 h-16 text-green-600" />
+        {step === 4 && (
+          <Card className="border-green-200 shadow-sm">
+            <CardContent className="py-14 text-center space-y-5">
+              <div className="flex justify-center">
+                <div className="bg-green-100 p-4 rounded-full">
+                  <CheckCircle2 className="w-14 h-14 text-green-600" />
+                </div>
               </div>
-            </div>
-            <h3 className="text-2xl font-bold mb-2">Transfer Successful!</h3>
-            <p className="text-gray-600 mb-6">Your transfer has been completed successfully</p>
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">Transfer Successful!</h3>
+                <p className="text-gray-600 mt-1">Your transfer has been completed successfully.</p>
+              </div>
 
-            <div className="bg-gray-50 p-6 rounded-lg max-w-md mx-auto mb-6 text-left">
-              <div className="flex justify-between mb-3">
-                <span className="text-gray-600">Amount Transferred</span>
-                <span className="font-bold text-green-600">{formatCurrency(parseFloat(formData.amount))}</span>
+              <div className="bg-gray-50 border border-gray-200 p-5 rounded-xl max-w-lg mx-auto text-left space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-sm">Amount Transferred</span>
+                  <span className="font-bold text-green-600">{formatCurrency(parseFloat(formData.amount))}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-sm">Transaction ID</span>
+                  <span className="font-mono text-xs text-gray-900">{transactionId}</span>
+                </div>
+                <div className="flex justify-between items-center gap-3">
+                  <span className="text-gray-600 text-sm">Idempotency Key</span>
+                  <span className="font-mono text-[11px] text-gray-900 truncate">{idempotencyKey}</span>
+                </div>
               </div>
-              <div className="flex justify-between mb-3">
-                <span className="text-gray-600">Transaction ID</span>
-                <span className="font-mono text-sm">{transactionId}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Key</span>
-                <span className="font-mono text-xs truncate">{idempotencyKey}</span>
-              </div>
-            </div>
 
-            <div className="flex gap-3 justify-center">
-              <Button variant="outline" onClick={() => navigate('/history')}>View History</Button>
-              <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleReset}>Make Another Transfer</Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button variant="outline" onClick={() => navigate('/history')}>View History</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleReset}>Make Another Transfer</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

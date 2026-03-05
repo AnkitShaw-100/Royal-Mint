@@ -29,7 +29,12 @@ import {
   Eye,
   ArrowLeft,
 } from "lucide-react";
-import { transactionAPI, formatCurrency, formatDate, formatTime } from "@/services/apiService";
+import {
+  transactionAPI,
+  formatCurrency,
+  formatDate,
+  formatTime,
+} from "@/services/apiService";
 import { toast } from "sonner";
 
 function History() {
@@ -64,7 +69,7 @@ function History() {
     if (user?.id) {
       fetchTransactions();
     }
-  }, [user?.id]);
+  }, [searchQuery, selectedStatus, user.id]);
 
   // Filter transactions
   const filterTransactions = (txns, status, query) => {
@@ -139,7 +144,7 @@ function History() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <div className="space-y-4 text-center">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
           <p className="text-gray-600">Loading transaction history...</p>
@@ -149,254 +154,260 @@ function History() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50/30 to-indigo-50/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8 space-y-6">
-        {/* Back Button */}
-        <Button variant="ghost" className="mb-4" onClick={() => navigate(-1)}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-900">
-            Transaction History
-          </h1>
-          <p className="text-gray-600 mt-1">
-            View and manage all your transactions
-          </p>
-        </div>
-        <Button variant="outline" className="gap-2">
-          <Download className="w-4 h-4" />
-          Export
-        </Button>
-      </div>
-
-      {/* Statistics Cards */}
-      {filteredTransactions.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription className="flex items-center gap-1">
-                <TrendingUp className="w-4 h-4 text-green-600" />
-                Money In
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {formatCurrency(stats.totalIn)}
-              </div>
-              <p className="text-xs text-gray-600 mt-1">
-                Total received
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription className="flex items-center gap-1">
-                <TrendingDown className="w-4 h-4 text-red-600" />
-                Money Out
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {formatCurrency(stats.totalOut)}
-              </div>
-              <p className="text-xs text-gray-600 mt-1">
-                Total sent
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Net Change</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${stats.net >= 0 ? "text-green-600" : "text-red-600"}`}>
-                {formatCurrency(stats.net)}
-              </div>
-              <p className="text-xs text-gray-600 mt-1">
-                Balance change
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Completed</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {stats.completedCount}/{stats.totalCount}
-              </div>
-              <p className="text-xs text-gray-600 mt-1">
-                Successful transactions
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filters & Search</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold">Status</label>
-              <Select value={selectedStatus} onValueChange={handleStatusChange}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">All Transactions</SelectItem>
-                  <SelectItem value="COMPLETED">Completed</SelectItem>
-                  <SelectItem value="PENDING">Pending</SelectItem>
-                  <SelectItem value="FAILED">Failed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-semibold">Search</label>
-              <Input
-                placeholder="Search by ID or description..."
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-              />
-            </div>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900">
+              Transaction History
+            </h1>
+            <p className="text-gray-600 mt-1">
+              View and manage all your transactions
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <Button variant="outline" className="gap-2">
+            <Download className="w-4 h-4" />
+            Export
+          </Button>
+        </div>
 
-      {/* Transactions List */}
-      {filteredTransactions.length > 0 ? (
-        <div className="space-y-4">
-          {Object.entries(groupedTransactions).map(([date, dayTransactions]) => (
-            <div key={date} className="space-y-3">
-              <h3 className="text-sm font-semibold text-gray-700 px-2">{date}</h3>
+        {/* Statistics Cards */}
+        {filteredTransactions.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardDescription className="flex items-center gap-1">
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                  Money In
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {formatCurrency(stats.totalIn)}
+                </div>
+                <p className="text-xs text-gray-600 mt-1">Total received</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardDescription className="flex items-center gap-1">
+                  <TrendingDown className="w-4 h-4 text-red-600" />
+                  Money Out
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
+                  {formatCurrency(stats.totalOut)}
+                </div>
+                <p className="text-xs text-gray-600 mt-1">Total sent</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardDescription>Net Change</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div
+                  className={`text-2xl font-bold ${stats.net >= 0 ? "text-green-600" : "text-red-600"}`}
+                >
+                  {formatCurrency(stats.net)}
+                </div>
+                <p className="text-xs text-gray-600 mt-1">Balance change</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardDescription>Completed</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">
+                  {stats.completedCount}/{stats.totalCount}
+                </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  Successful transactions
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Filters */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Filters & Search</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                {dayTransactions.map((transaction) => {
-                  const amount = parseFloat(transaction.amount);
-                  const isDebit = transaction.fromAccount === user.id;
-                  const isCredit = transaction.toAccount === user.id;
+                <label className="text-sm font-semibold">Status</label>
+                <Select
+                  value={selectedStatus}
+                  onValueChange={handleStatusChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">All Transactions</SelectItem>
+                    <SelectItem value="COMPLETED">Completed</SelectItem>
+                    <SelectItem value="PENDING">Pending</SelectItem>
+                    <SelectItem value="FAILED">Failed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                  const statusColor = {
-                    PENDING: "bg-yellow-100 text-yellow-800",
-                    COMPLETED: "bg-green-100 text-green-800",
-                    FAILED: "bg-red-100 text-red-800",
-                    CANCELLED: "bg-gray-100 text-gray-800",
-                  };
-
-                  const statusIcon = {
-                    COMPLETED: "✓",
-                    PENDING: "⏱",
-                    FAILED: "✕",
-                    CANCELLED: "—",
-                  };
-
-                  return (
-                    <Card
-                      key={transaction._id}
-                      className="cursor-pointer hover:shadow-md transition-all"
-                      onClick={() => navigate(`/transaction/${transaction._id}`)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 flex-1">
-                            <div
-                              className={`p-3 rounded-full ${
-                                isDebit ? "bg-red-100" : "bg-green-100"
-                              }`}
-                            >
-                              {isDebit ? (
-                                <ArrowUpRight className="w-5 h-5 text-red-600" />
-                              ) : (
-                                <ArrowDownLeft className="w-5 h-5 text-green-600" />
-                              )}
-                            </div>
-
-                            <div className="flex-1">
-                              <p className="font-semibold text-gray-900">
-                                {isDebit ? "Sent to " : "Received from "}
-                                {transaction.description || "Account"}
-                              </p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="text-xs text-gray-600 font-mono">
-                                  ID: {transaction._id?.slice(-8)}
-                                </span>
-                                <span className="text-xs text-gray-600">
-                                  {formatTime(transaction.createdAt)}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="text-right space-y-2">
-                            <div
-                              className={`text-lg font-bold ${
-                                isDebit ? "text-red-600" : "text-green-600"
-                              }`}
-                            >
-                              {isDebit ? "-" : "+"}{formatCurrency(amount)}
-                            </div>
-                            <Badge className={`${statusColor[transaction.status]}`}>
-                              {statusIcon[transaction.status]} {transaction.status}
-                            </Badge>
-                          </div>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="ml-4"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/transaction/${transaction._id}`);
-                            }}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-semibold">Search</label>
+                <Input
+                  placeholder="Search by ID or description..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                />
               </div>
             </div>
-          ))}
-        </div>
-      ) : (
-        <Card className="border-2">
-          <CardContent className="pt-12 pb-12 text-center space-y-4">
-            {error ? (
-              <>
-                <AlertCircle className="w-12 h-12 text-red-600 mx-auto" />
-                <h3 className="text-lg font-semibold text-gray-900">Error Loading Transactions</h3>
-                <p className="text-gray-600">{error}</p>
-              </>
-            ) : (
-              <>
-                <ArrowUpRight className="w-12 h-12 text-gray-400 mx-auto" />
-                <h3 className="text-lg font-semibold text-gray-900">No Transactions Found</h3>
-                <p className="text-gray-600">
-                  {selectedStatus !== "ALL" || searchQuery
-                    ? "Try adjusting your filters"
-                    : "Start making transactions to see them here"}
-                </p>
-                <Button onClick={() => navigate("/transfer")}>
-                  Make Your First Transfer
-                </Button>
-              </>
-            )}
           </CardContent>
         </Card>
-      )}
-    </div>
+
+        {/* Transactions List */}
+        {filteredTransactions.length > 0 ? (
+          <div className="space-y-4">
+            {Object.entries(groupedTransactions).map(
+              ([date, dayTransactions]) => (
+                <div key={date} className="space-y-3">
+                  <h3 className="text-sm font-semibold text-gray-700 px-2">
+                    {date}
+                  </h3>
+                  <div className="space-y-2">
+                    {dayTransactions.map((transaction) => {
+                      const amount = parseFloat(transaction.amount);
+                      const isDebit = transaction.fromAccount === user.id;
+
+                      const statusColor = {
+                        PENDING: "bg-yellow-100 text-yellow-800",
+                        COMPLETED: "bg-green-100 text-green-800",
+                        FAILED: "bg-red-100 text-red-800",
+                        CANCELLED: "bg-gray-100 text-gray-800",
+                      };
+
+                      const statusIcon = {
+                        COMPLETED: "✓",
+                        PENDING: "⏱",
+                        FAILED: "✕",
+                        CANCELLED: "—",
+                      };
+
+                      return (
+                        <Card
+                          key={transaction._id}
+                          className="cursor-pointer hover:shadow-md transition-all"
+                          onClick={() =>
+                            navigate(`/transaction/${transaction._id}`)
+                          }
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4 flex-1">
+                                <div
+                                  className={`p-3 rounded-full ${
+                                    isDebit ? "bg-red-100" : "bg-green-100"
+                                  }`}
+                                >
+                                  {isDebit ? (
+                                    <ArrowUpRight className="w-5 h-5 text-red-600" />
+                                  ) : (
+                                    <ArrowDownLeft className="w-5 h-5 text-green-600" />
+                                  )}
+                                </div>
+
+                                <div className="flex-1">
+                                  <p className="font-semibold text-gray-900">
+                                    {isDebit ? "Sent to " : "Received from "}
+                                    {transaction.description || "Account"}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-xs text-gray-600 font-mono">
+                                      ID: {transaction._id?.slice(-8)}
+                                    </span>
+                                    <span className="text-xs text-gray-600">
+                                      {formatTime(transaction.createdAt)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="text-right space-y-2">
+                                <div
+                                  className={`text-lg font-bold ${
+                                    isDebit ? "text-red-600" : "text-green-600"
+                                  }`}
+                                >
+                                  {isDebit ? "-" : "+"}
+                                  {formatCurrency(amount)}
+                                </div>
+                                <Badge
+                                  className={`${statusColor[transaction.status]}`}
+                                >
+                                  {statusIcon[transaction.status]}{" "}
+                                  {transaction.status}
+                                </Badge>
+                              </div>
+
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="ml-4"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/transaction/${transaction._id}`);
+                                }}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+        ) : (
+          <Card className="border-2">
+            <CardContent className="pt-12 pb-12 text-center space-y-4">
+              {error ? (
+                <>
+                  <AlertCircle className="w-12 h-12 text-red-600 mx-auto" />
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Error Loading Transactions
+                  </h3>
+                  <p className="text-gray-600">{error}</p>
+                </>
+              ) : (
+                <>
+                  <ArrowUpRight className="w-12 h-12 text-gray-400 mx-auto" />
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    No Transactions Found
+                  </h3>
+                  <p className="text-gray-600">
+                    {selectedStatus !== "ALL" || searchQuery
+                      ? "Try adjusting your filters"
+                      : "Start making transactions to see them here"}
+                  </p>
+                  <Button onClick={() => navigate("/transfer")}>
+                    Make Your First Transfer
+                  </Button>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

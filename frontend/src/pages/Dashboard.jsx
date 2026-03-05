@@ -17,7 +17,7 @@ import {
   History as HistoryIcon,
   Loader2
 } from 'lucide-react';
-import { accountAPI, transactionAPI, formatCurrency, formatDate, formatTime } from '@/services/apiService';
+import { accountAPI, transactionAPI, formatCurrency, formatDate } from '@/services/apiService';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ function Dashboard() {
   const [transactions, setTransactions] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [totalBalance, setTotalBalance] = React.useState(0);
-  const [error, setError] = React.useState(null);
+  const [, setError] = React.useState(null);
 
   // Fetch accounts and transactions
   React.useEffect(() => {
@@ -151,7 +151,7 @@ function Dashboard() {
       </div>
 
       {/* User Info Card */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+      <Card className="bg-linear-to-r from-blue-50 to-indigo-50 border-blue-200">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>

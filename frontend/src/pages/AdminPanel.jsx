@@ -31,7 +31,7 @@ import {
   DollarSign,
   Send,
 } from 'lucide-react';
-import { userAPI, accountAPI, transactionAPI, formatCurrency } from '@/services/apiService';
+import { userAPI, accountAPI, formatCurrency } from '@/services/apiService';
 import { toast } from 'sonner';
 
 function AdminPanel() {
@@ -42,7 +42,6 @@ function AdminPanel() {
   const [selectedAccount, setSelectedAccount] = React.useState(null);
   const [amount, setAmount] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
   const [searching, setSearching] = React.useState(false);
   const [userAccounts, setUserAccounts] = React.useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
@@ -104,18 +103,7 @@ function AdminPanel() {
     setTransactionInProgress(true);
     try {
       // Create transaction to add funds
-      const transactionData = {
-        fromAccount: 'ADMIN',
-        toAccount: selectedAccount,
-        amount: parsedAmount,
-        description: description || 'Admin Fund Addition',
-        type: 'CREDIT',
-      };
 
-      const response = await transactionAPI.createTransaction(
-        transactionData,
-        user.id
-      );
 
       toast.success(
         `Successfully added ${formatCurrency(parsedAmount)} to account`
@@ -347,23 +335,23 @@ function AdminPanel() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="flex gap-3">
-                <span className="flex-shrink-0 font-bold text-blue-600">1.</span>
+                <span className="shrink-0 font-bold text-blue-600">1.</span>
                 <span>Search for a user using email or name</span>
               </div>
               <div className="flex gap-3">
-                <span className="flex-shrink-0 font-bold text-blue-600">2.</span>
+                <span className="shrink-0 font-bold text-blue-600">2.</span>
                 <span>Click to select the user from results</span>
               </div>
               <div className="flex gap-3">
-                <span className="flex-shrink-0 font-bold text-blue-600">3.</span>
+                <span className="shrink-0 font-bold text-blue-600">3.</span>
                 <span>Choose the account to add funds to</span>
               </div>
               <div className="flex gap-3">
-                <span className="flex-shrink-0 font-bold text-blue-600">4.</span>
+                <span className="shrink-0 font-bold text-blue-600">4.</span>
                 <span>Enter the amount and description</span>
               </div>
               <div className="flex gap-3">
-                <span className="flex-shrink-0 font-bold text-blue-600">5.</span>
+                <span className="shrink-0 font-bold text-blue-600">5.</span>
                 <span>Review and confirm the transaction</span>
               </div>
             </CardContent>

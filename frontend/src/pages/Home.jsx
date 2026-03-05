@@ -60,44 +60,6 @@ function Home() {
     },
   ];
 
-  const features = [
-    {
-      icon: Shield,
-      title: "Bank-Grade Security",
-      description: "256-bit encryption protects your data",
-      color: "bg-blue-600",
-    },
-    {
-      icon: Clock,
-      title: "Instant Transfers",
-      description: "Real-time transaction processing",
-      color: "bg-purple-600",
-    },
-    {
-      icon: Lock,
-      title: "Privacy First",
-      description: "Your data belongs only to you",
-      color: "bg-emerald-600",
-    },
-    {
-      icon: Zap,
-      title: "Lightning Fast",
-      description: "Optimized for speed and performance",
-      color: "bg-orange-600",
-    },
-    {
-      icon: Globe,
-      title: "Global Access",
-      description: "Access your account from anywhere",
-      color: "bg-indigo-600",
-    },
-    {
-      icon: HeadphonesIcon,
-      title: "24/7 Support",
-      description: "Always here to help you",
-      color: "bg-rose-600",
-    },
-  ];
 
   const stats = [
     { label: "Active Users", value: "10K+", icon: Users },
@@ -138,9 +100,7 @@ function Home() {
         <h1 className="text-6xl md:text-7xl font-extrabold text-gray-900 leading-tight tracking-tight">
           Your Complete Banking
           <br />
-          <span className="text-blue-600">
-            Command Center
-          </span>
+          <span className="text-blue-600">Command Center</span>
         </h1>
         <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
           Access all your banking services in one secure location. Manage
@@ -149,7 +109,7 @@ function Home() {
         <div className="flex items-center justify-center gap-4 pt-4">
           <Button
             size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
+            className="bg-blue-600 text-white px-8 py-6 text-lg shadow-lg transition-all"
             onClick={() => navigate("/dashboard")}
           >
             Get Started
@@ -158,7 +118,7 @@ function Home() {
           <Button
             size="lg"
             variant="outline"
-            className="px-8 py-6 text-lg border-2 hover:bg-gray-50"
+            className="px-8 py-6 text-lg border-2"
             onClick={() => navigate("/transfer")}
           >
             Learn More
@@ -173,14 +133,18 @@ function Home() {
           return (
             <Card
               key={index}
-              className="text-center border-2 hover:border-blue-200 hover:shadow-lg transition-all duration-300"
+              className="text-center border-2 transition-all duration-300"
             >
               <CardContent className="pt-6 space-y-3">
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 rounded-full">
                   <Icon className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-4xl font-bold text-gray-900">{stat.value}</div>
-                <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
+                <div className="text-4xl font-bold text-gray-900">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-gray-600 font-medium">
+                  {stat.label}
+                </div>
               </CardContent>
             </Card>
           );
@@ -201,13 +165,13 @@ function Home() {
             return (
               <Card
                 key={index}
-                className="group relative overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-300 hover:-translate-y-1"
+                className="group relative overflow-hidden cursor-pointer transition-all duration-300 border-2"
                 onClick={() => navigate(page.path)}
               >
                 <CardHeader className="space-y-4 relative">
                   <div className="flex items-start justify-between">
                     <div
-                      className={`${page.color} p-4 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                      className={`${page.color} p-4 rounded-2xl shadow-lg transition-transform duration-300`}
                     >
                       <Icon className="w-8 h-8 text-white" />
                     </div>
@@ -216,7 +180,7 @@ function Home() {
                     </Badge>
                   </div>
                   <div>
-                    <CardTitle className="text-2xl font-bold group-hover:text-blue-600 transition-colors">
+                    <CardTitle className="text-2xl font-bold transition-colors">
                       {page.title}
                     </CardTitle>
                     <CardDescription className="text-base mt-2 leading-relaxed">
@@ -227,10 +191,10 @@ function Home() {
                 <CardContent className="relative">
                   <Button
                     variant="ghost"
-                    className="w-full group-hover:bg-blue-50 group-hover:text-blue-600 font-semibold transition-all"
+                    className="w-full font-semibold transition-all"
                   >
                     Access {page.title}
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" />
+                    <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </CardContent>
               </Card>
@@ -244,7 +208,7 @@ function Home() {
       {/* How It Works Section */}
       <div className="space-y-12">
         <div className="text-center space-y-4">
-          <Badge className="px-4 py-2 bg-purple-600 text-white border-0">
+          <Badge className="px-4 py-2 bg-blue-600 text-white border-0">
             Simple Process
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
@@ -259,28 +223,25 @@ function Home() {
             const Icon = item.icon;
             return (
               <div key={index} className="relative">
-                <Card className="text-center border-2 hover:border-purple-200 hover:shadow-xl transition-all duration-300 h-full">
+                <Card className="text-center border-2 transition-all duration-300 h-full">
                   <CardContent className="pt-12 pb-8 space-y-6">
                     <div className="relative inline-block">
-                      <div className="absolute inset-0 bg-purple-600 rounded-full blur-xl opacity-20"></div>
-                      <div className="relative bg-purple-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
+                      <div className="absolute inset-0 bg-blue-600 rounded-full blur-xl opacity-20"></div>
+                      <div className="relative bg-blue-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
                         <Icon className="w-10 h-10 text-white" />
                       </div>
-                      <Badge className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center bg-white text-purple-600 font-bold border-2 border-purple-300">
+                      <Badge className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center bg-white text-blue-600 font-bold border-2 border-blue-300">
                         {item.step}
                       </Badge>
                     </div>
                     <div className="space-y-2">
-                      <h3 className="text-2xl font-bold text-gray-900">{item.title}</h3>
+                      <h3 className="text-2xl font-bold text-gray-900">
+                        {item.title}
+                      </h3>
                       <p className="text-gray-600">{item.description}</p>
                     </div>
                   </CardContent>
                 </Card>
-                {index < howItWorks.length - 1 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
-                    <ArrowRight className="w-8 h-8 text-gray-300" />
-                  </div>
-                )}
               </div>
             );
           })}
@@ -289,77 +250,51 @@ function Home() {
 
       <Separator className="my-16" />
 
-      {/* Features Section */}
-      <div className="space-y-12">
-        <div className="text-center space-y-4">
-          <Badge className="px-4 py-2 bg-blue-600 text-white border-0">
-            Why Choose Us
-          </Badge>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
-            Powerful Features
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Experience banking with cutting-edge technology and security
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <Card
-                key={index}
-                className="group border-2 hover:border-blue-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              >
-                <CardContent className="pt-8 pb-6 space-y-4">
-                  <div className={`inline-flex p-4 rounded-2xl ${feature.color} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">{feature.description}</p>
-                  </div>
-                  <div className="flex items-center text-blue-600 font-semibold text-sm group-hover:gap-2 transition-all">
-                    Learn more
-                    <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      <Separator className="my-16" />
-
       {/* Trust Indicators */}
-      <div className="bg-gray-50 rounded-3xl p-12 border-2 border-gray-200">
+      <div className="py-16">
         <div className="text-center space-y-8">
           <div className="space-y-4">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
               Trusted by Thousands
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Join the community of satisfied users who trust us with their finances
+              Join the community of satisfied users who trust us with their
+              finances
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
-              { icon: CheckCircle2, text: "Bank-Level Security" },
-              { icon: Shield, text: "Data Protection" },
-              { icon: Star, text: "5-Star Rated" },
+              {
+                icon: CheckCircle2,
+                text: "Bank-Level Security",
+                description: "256-bit encryption",
+              },
+              {
+                icon: Shield,
+                text: "Data Protection",
+                description: "GDPR compliant",
+              },
+              { icon: Star, text: "5-Star Rated", description: "10K+ reviews" },
             ].map((item, index) => {
               const Icon = item.icon;
               return (
                 <div
                   key={index}
-                  className="flex items-center justify-center gap-3 bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300"
+                  className="bg-white border-2 border-gray-100 hover:border-blue-300 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
                 >
-                  <div className="bg-green-600 p-3 rounded-full">
-                    <Icon className="w-6 h-6 text-white" />
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="bg-linear-to-br from-blue-50 to-indigo-50 p-4 rounded-2xl group-hover:from-blue-100 group-hover:to-indigo-100 transition-all">
+                      <Icon className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-gray-900 text-lg">
+                        {item.text}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {item.description}
+                      </p>
+                    </div>
                   </div>
-                  <span className="font-semibold text-gray-900">{item.text}</span>
                 </div>
               );
             })}
@@ -368,31 +303,54 @@ function Home() {
       </div>
 
       {/* CTA Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-blue-600">
-        <div className="relative text-center py-20 px-8 space-y-8">
-          <h2 className="text-4xl md:text-5xl font-bold text-white">
-            Ready to Get Started?
-          </h2>
-          <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-            Join thousands of users managing their finances securely and efficiently
-          </p>
-          <div className="flex items-center justify-center gap-4">
+      <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-blue-600 to-indigo-600">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-white rounded-full -mr-40 -mt-40"></div>
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-white rounded-full -ml-40 -mb-40"></div>
+        </div>
+        <div className="relative text-center py-24 px-8 space-y-10">
+          <div className="space-y-4 max-w-3xl mx-auto">
+            <h2 className="text-5xl md:text-6xl font-extrabold text-white leading-tight">
+              Ready to Take Control
+              <br />
+              of Your Finances?
+            </h2>
+            <p className="text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
+              Join thousands of users who are already managing their finances
+              securely and efficiently with Royal Mint.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Button
               size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all"
+              className="bg-white text-blue-600 hover:bg-gray-100 px-10 py-7 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all"
               onClick={() => navigate("/dashboard")}
             >
-              Open Dashboard
+              Get Started Now
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="border-2 border-white text-white hover:bg-white/10 px-8 py-6 text-lg font-semibold"
+              className="border-2 border-white text-white px-10 py-7 text-lg font-semibold backdrop-blur-sm"
               onClick={() => navigate("/transfer")}
             >
-              Start Transfer
+              Learn More
+              <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
+          </div>
+          <div className="pt-8 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
+            <div className="text-white space-y-1">
+              <div className="text-3xl font-bold">10K+</div>
+              <div className="text-sm text-blue-100">Active Users</div>
+            </div>
+            <div className="text-white space-y-1">
+              <div className="text-3xl font-bold">$50M+</div>
+              <div className="text-sm text-blue-100">Transactions</div>
+            </div>
+            <div className="text-white space-y-1">
+              <div className="text-3xl font-bold">99.9%</div>
+              <div className="text-sm text-blue-100">Uptime</div>
+            </div>
           </div>
         </div>
       </div>
