@@ -192,8 +192,22 @@ function App() {
           <Routes>
             {/* Routes without navbar (have back buttons) */}
             <Route path="/accounts" element={<Accounts />} />
-            <Route path="/history" element={<History />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route
+              path="/history"
+              element={
+                <Layout>
+                  <History />
+                </Layout>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <Layout>
+                  <Profile />
+                </Layout>
+              }
+            />
             <Route path="/transaction/:id" element={<TransactionDetail />} />
 
             {/* Routes with navbar/layout */}
