@@ -60,14 +60,6 @@ function Home() {
     },
   ];
 
-
-  const stats = [
-    { label: "Active Users", value: "10K+", icon: Users },
-    { label: "Ledger Entries", value: "1M+", icon: TrendingUp },
-    { label: "Success Rate", value: "99.9%", icon: Star },
-    { label: "Countries", value: "50+", icon: Globe },
-  ];
-
   const howItWorks = [
     {
       step: "1",
@@ -119,39 +111,19 @@ function Home() {
             size="lg"
             variant="outline"
             className="px-7 py-5 text-base border-2"
-            onClick={() => navigate("/transfer")}
+            onClick={() => navigate("/about")}
           >
             Learn More
           </Button>
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-              <Card key={index} className="text-center border transition-all duration-300">
-                <CardContent className="pt-5 pb-5 space-y-2">
-                <div className="inline-flex items-center justify-center w-10 h-10 md:w-11 md:h-11 bg-blue-600 rounded-full">
-                  <Icon className="w-5 h-5 text-white" />
-                </div>
-                <div className="text-2xl md:text-3xl font-bold text-gray-900 leading-none">
-                  {stat.value}
-                </div>
-                <div className="text-xs md:text-sm text-gray-600 font-medium">
-                  {stat.label}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
       {/* Navigation Cards */}
       <div className="space-y-7">
         <div className="text-center space-y-3">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Quick Access</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+            Quick Access
+          </h2>
           <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
             Everything you need to manage your finances, all in one place
           </p>
@@ -235,7 +207,9 @@ function Home() {
                       <h3 className="text-xl font-bold text-gray-900">
                         {item.title}
                       </h3>
-                      <p className="text-sm md:text-base text-gray-600">{item.description}</p>
+                      <p className="text-sm md:text-base text-gray-600">
+                        {item.description}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -245,6 +219,86 @@ function Home() {
         </div>
       </div>
 
+      <Separator className="my-16" />
+
+      {/* Key Features Section */}
+      <div className="space-y-6">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+            Why Choose Royal Mint?
+          </h2>
+          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+            Experience secure, fast, and reliable banking with features designed
+            for you
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-100 p-3 rounded-lg">
+                  <Lock className="w-6 h-6 text-blue-600" />
+                </div>
+                <CardTitle className="text-lg">Bank-Level Security</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600">
+                Your funds and data are protected with military-grade encryption
+                and multi-factor authentication
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="bg-green-100 p-3 rounded-lg">
+                  <Zap className="w-6 h-6 text-green-600" />
+                </div>
+                <CardTitle className="text-lg">Instant Transactions</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600">
+                Send and receive money in seconds with our lightning-fast
+                transaction processing
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="bg-purple-100 p-3 rounded-lg">
+                  <Globe className="w-6 h-6 text-purple-600" />
+                </div>
+                <CardTitle className="text-lg">Global Access</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600">
+                Transact across 50+ countries without geographical boundaries or
+                restrictions
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="bg-orange-100 p-3 rounded-lg">
+                  <HeadphonesIcon className="w-6 h-6 text-orange-600" />
+                </div>
+                <CardTitle className="text-lg">24/7 Support</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600">
+                Our dedicated support team is always available to help you with
+                any questions
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
       <Separator className="my-16" />
 
       {/* Trust Indicators */}
@@ -329,7 +383,7 @@ function Home() {
             <Button
               size="lg"
               className="border-2 border-white text-white px-8 py-6 text-base font-semibold backdrop-blur-sm"
-              onClick={() => navigate("/transfer")}
+              onClick={() => navigate("/about")}
             >
               Learn More
               <ArrowRight className="w-5 h-5 ml-2" />

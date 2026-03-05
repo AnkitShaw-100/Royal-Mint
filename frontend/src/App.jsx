@@ -14,6 +14,7 @@ import Accounts from "./pages/Accounts";
 import Transfer from "./pages/Transfer";
 import History from "./pages/History";
 import Profile from "./pages/Profile";
+import AboutUs from "./pages/AboutUs";
 import AdminPanel from "./pages/AdminPanel";
 import TransactionDetail from "./pages/TransactionDetail";
 import { useSyncUserToDatabase } from "./hooks/useSyncUserToDatabase";
@@ -217,6 +218,14 @@ function App() {
               element={
                 <Layout>
                   <Transfer />
+                </Layout>
+              }
+            />
+            <Route
+              path="/about"
+              element={
+                <Layout>
+                  <AboutUs />
                 </Layout>
               }
             />
