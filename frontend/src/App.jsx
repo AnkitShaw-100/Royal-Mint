@@ -59,8 +59,8 @@ function App() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20">
         {/* Signed Out - Welcome Page */}
         <SignedOut>
-          <div className="w-full px-6 py-8 max-w-7xl mx-auto">
-            <div className="mb-8 flex items-center gap-3">
+          <div className="w-full px-6 py-4 max-w-7xl mx-auto">
+            <div className="mb-4 flex items-center gap-3">
               <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-2 rounded-lg">
                 <Building2 className="w-6 h-6 text-white" />
               </div>
@@ -69,43 +69,37 @@ function App() {
                 <p className="text-xs text-gray-500">Online Banking</p>
               </div>
             </div>
-            <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
+            <div className="min-h-[calc(100vh-6rem)] flex items-center justify-center py-8">
               <div className="text-center space-y-6 max-w-3xl">
-                <div className="inline-block p-4 bg-blue-100 rounded-2xl mb-4">
-                  <Building2 className="w-16 h-16 text-blue-600" />
-                </div>
-                <h2 className="text-6xl font-bold text-gray-900">
-                  Welcome to <span className="text-blue-600">Royal Mint</span>
-                </h2>
-                <p className="text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
-                  Experience modern banking with enterprise-grade security. 
-                  Manage your finances with confidence and ease.
+                <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight tracking-tight">
+                  Your Complete Banking
+                  <br />
+                  <span className="text-blue-600">
+                    Command Center
+                  </span>
+                </h1>
+                <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                  Access all your banking services in one secure location. Manage
+                  accounts, transfer funds, and track transactions with ease.
                 </p>
-                <div className="flex gap-4 justify-center pt-4">
+                <div className="flex items-center justify-center gap-4 pt-2">
                   <SignInButton mode="modal">
-                    <Button size="lg" variant="outline" className="text-base px-8">
+                    <Button 
+                      size="lg" 
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-base shadow-lg hover:shadow-xl transition-all"
+                    >
                       Sign In to Your Account
                     </Button>
                   </SignInButton>
                   <SignUpButton mode="modal">
-                    <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-base px-8">
+                    <Button 
+                      size="lg" 
+                      variant="outline" 
+                      className="px-8 py-6 text-base border-2 hover:bg-gray-50"
+                    >
                       Open New Account
                     </Button>
                   </SignUpButton>
-                </div>
-                <div className="pt-8 grid grid-cols-3 gap-8 text-center">
-                  <div>
-                    <div className="text-3xl font-bold text-blue-600">99.9%</div>
-                    <div className="text-sm text-gray-600">Uptime</div>
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold text-blue-600">256-bit</div>
-                    <div className="text-sm text-gray-600">Encryption</div>
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold text-blue-600">24/7</div>
-                    <div className="text-sm text-gray-600">Support</div>
-                  </div>
                 </div>
               </div>
             </div>
