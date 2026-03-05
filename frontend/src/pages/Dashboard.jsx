@@ -12,7 +12,6 @@ import {
   CreditCard, 
   TrendingUp,
   Wallet,
-  Receipt,
   ArrowLeftRight,
   History as HistoryIcon,
   Loader2
@@ -107,12 +106,6 @@ function Dashboard() {
 
   const quickActions = [
     {
-      title: 'Transactions',
-      description: 'View all transactions',
-      path: '/transactions',
-      icon: Receipt,
-    },
-    {
       title: 'Accounts',
       description: 'Manage accounts',
       path: '/accounts',
@@ -126,7 +119,7 @@ function Dashboard() {
     },
     {
       title: 'History',
-      description: 'View history',
+      description: 'View ledger',
       path: '/history',
       icon: HistoryIcon,
     },

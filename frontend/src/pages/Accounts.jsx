@@ -26,7 +26,6 @@ function Accounts() {
   const [accountBalances, setAccountBalances] = React.useState({});
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
-  const [totalBalance, setTotalBalance] = React.useState(0);
   const [copiedAccountId, setCopiedAccountId] = React.useState(null);
 
   // Fetch accounts and balances
@@ -41,19 +40,16 @@ function Accounts() {
         setAccounts(userAccounts);
 
         // Fetch balance for each account
-        let total = 0;
         const balances = {};
         for (const account of userAccounts) {
           try {
             const balanceResponse = await accountAPI.getAccountBalance(account._id, user.id);
             balances[account._id] = parseFloat(balanceResponse.balance.balance);
-            total += parseFloat(balanceResponse.balance.balance);
           } catch {
             balances[account._id] = 0;
           }
         }
         setAccountBalances(balances);
-        setTotalBalance(total);
       } catch (err) {
         console.error('Error fetching accounts:', err);
         setError(err.message);
@@ -81,29 +77,15 @@ function Accounts() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50/30 to-indigo-50/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8 space-y-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold text-gray-900">Your Accounts</h1>
-        <p className="text-gray-600 mt-1">Manage and receive money in your accounts</p>
+        <h1 className="text-4xl font-bold text-gray-900">Your Account</h1>
+        <p className="text-gray-600 mt-1">Manage and receive money in your account</p>
       </div>
 
-      {/* Total Balance Card */}
-      <Card className="bg-linear-to-r from-blue-600 to-indigo-700 text-white border-0">
-        <CardHeader>
-          <CardTitle className="text-white text-lg">Total Balance</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-4xl font-bold mb-2">
-            {formatCurrency(totalBalance)}
-          </div>
-          <p className="text-blue-100">Across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
-        </CardContent>
-      </Card>
-
       {/* Accounts Grid */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">All Accounts</h2>
+      <div className="space-y-4">
         {error && (
           <Card className="mb-6 border-red-200 bg-red-50">
             <CardContent className="pt-6 flex items-center gap-2 text-red-600">
@@ -125,7 +107,7 @@ function Accounts() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-5">
             {accounts.map((account) => {
               const Icon = getAccountIcon(account.status);
               const balance = accountBalances[account._id] || 0;
@@ -134,18 +116,18 @@ function Accounts() {
                                  'bg-red-50 text-red-700 border-red-200';
               
               return (
-                <Card key={account._id} className="border-2 hover:shadow-lg transition-all overflow-hidden">
-                  <CardHeader className="pb-4">
+                <Card key={account._id} className="border-gray-200 shadow-sm hover:shadow-md transition-all overflow-hidden">
+                  <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-4 flex-1">
-                        <div className="bg-blue-100 p-4 rounded-xl">
-                          <Icon className="w-6 h-6 text-blue-600" />
+                        <div className="bg-blue-100 p-3 rounded-lg">
+                          <Icon className="w-5 h-5 text-blue-600" />
                         </div>
                         <div className="flex-1">
-                          <CardTitle className="text-xl text-gray-900">
+                          <CardTitle className="text-lg text-gray-900">
                             {account.accountType || 'Savings'} Account
                           </CardTitle>
-                          <CardDescription className="text-base">
+                          <CardDescription className="text-sm md:text-base">
                             {account.currency} Account • Created on {new Date(account.createdAt).toLocaleDateString()}
                           </CardDescription>
                         </div>
@@ -156,7 +138,7 @@ function Accounts() {
                     </div>
                   </CardHeader>
 
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-4">
                     {/* Balance Section */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
@@ -189,6 +171,26 @@ function Accounts() {
                             )}
                           </Button>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Account Details */}
+                    <div className="grid grid-cols-2 gap-3 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                      <div>
+                        <p className="text-xs text-gray-500">Type</p>
+                        <p className="text-sm font-semibold text-gray-900">{account.accountType || 'Savings'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Currency</p>
+                        <p className="text-sm font-semibold text-gray-900">{account.currency || 'INR'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Status</p>
+                        <p className="text-sm font-semibold text-gray-900">{account.status}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Created</p>
+                        <p className="text-sm font-semibold text-gray-900">{new Date(account.createdAt).toLocaleDateString()}</p>
                       </div>
                     </div>
 

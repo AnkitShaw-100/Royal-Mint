@@ -134,6 +134,28 @@ export const accountAPI = {
     });
     return handleResponse(response);
   },
+
+  /**
+   * Get account ledger entries
+   */
+  getAccountLedger: async (accountId, clerkId) => {
+    const response = await fetch(`${API_BASE_URL}/accounts/${accountId}/ledger`, {
+      method: 'GET',
+      headers: getAuthHeader(clerkId),
+    });
+    return handleResponse(response);
+  },
+
+  /**
+   * Get all ledger entries for user (across all accounts)
+   */
+  getUserLedger: async (clerkId) => {
+    const response = await fetch(`${API_BASE_URL}/accounts/ledger/all`, {
+      method: 'GET',
+      headers: getAuthHeader(clerkId),
+    });
+    return handleResponse(response);
+  },
 };
 
 // ============================================================

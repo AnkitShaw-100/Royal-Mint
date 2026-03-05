@@ -35,14 +35,6 @@ function Home() {
 
   const pages = [
     {
-      title: "Transactions",
-      description: "View all your transaction details",
-      icon: Receipt,
-      path: "/transactions",
-      color: "bg-violet-600",
-      badge: "Activity",
-    },
-    {
       title: "Transfer",
       description: "Send money to other accounts quickly",
       icon: ArrowLeftRight,
@@ -51,19 +43,27 @@ function Home() {
       badge: "Send",
     },
     {
-      title: "History",
-      description: "Review your complete transaction history",
+      title: "Ledger History",
+      description: "Review your complete ledger entries",
       icon: History,
       path: "/history",
       color: "bg-pink-600",
       badge: "Records",
+    },
+    {
+      title: "Accounts",
+      description: "Manage your bank accounts",
+      icon: Receipt,
+      path: "/accounts",
+      color: "bg-violet-600",
+      badge: "Manage",
     },
   ];
 
 
   const stats = [
     { label: "Active Users", value: "10K+", icon: Users },
-    { label: "Transactions", value: "1M+", icon: TrendingUp },
+    { label: "Ledger Entries", value: "1M+", icon: TrendingUp },
     { label: "Success Rate", value: "99.9%", icon: Star },
     { label: "Countries", value: "50+", icon: Globe },
   ];
@@ -104,7 +104,7 @@ function Home() {
         </h1>
         <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
           Access all your banking services in one secure location. Manage
-          accounts, transfer funds, and track transactions with ease.
+          accounts, transfer funds, and track your ledger with ease.
         </p>
         <div className="flex items-center justify-center gap-4 pt-2">
           <Button
@@ -342,7 +342,7 @@ function Home() {
             </div>
             <div className="text-white space-y-1">
               <div className="text-2xl md:text-3xl font-bold">$50M+</div>
-              <div className="text-sm text-blue-100">Transactions</div>
+              <div className="text-sm text-blue-100">Volume</div>
             </div>
             <div className="text-white space-y-1">
               <div className="text-2xl md:text-3xl font-bold">99.9%</div>

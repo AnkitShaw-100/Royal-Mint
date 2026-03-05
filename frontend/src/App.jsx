@@ -10,7 +10,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
-import Transactions from "./pages/Transactions";
 import Accounts from "./pages/Accounts";
 import Transfer from "./pages/Transfer";
 import History from "./pages/History";
@@ -192,7 +191,6 @@ function App() {
           <Routes>
             {/* Routes without navbar (have back buttons) */}
             <Route path="/accounts" element={<Accounts />} />
-            <Route path="/transactions" element={<Transactions />} />
             <Route path="/history" element={<History />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/transaction/:id" element={<TransactionDetail />} />

@@ -18,7 +18,6 @@ import {
   Lock,
   Bell,
   History,
-  Activity,
   CreditCard,
   ArrowLeft,
 } from "lucide-react";
@@ -114,15 +113,7 @@ function Profile() {
                   onClick={() => navigate("/accounts")}
                 >
                   <CreditCard className="w-4 h-4 mr-2" />
-                  Accounts
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-sm hover:bg-indigo-50"
-                  onClick={() => navigate("/transactions")}
-                >
-                  <Activity className="w-4 h-4 mr-2" />
-                  Transactions
+                  Account
                 </Button>
                 <Button
                   variant="outline"
@@ -130,7 +121,7 @@ function Profile() {
                   onClick={() => navigate("/history")}
                 >
                   <History className="w-4 h-4 mr-2" />
-                  History
+                  Ledger History
                 </Button>
               </CardContent>
             </Card>

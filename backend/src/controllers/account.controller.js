@@ -306,6 +306,119 @@ async function deleteAccountController(req, res) {
   }
 }
 
+// Get account ledger entries
+async function getAccountLedgerController(req, res) {
+  try {
+    const { accountId } = req.params;
+    const userId = req.user._id; // From auth middleware
+
+    console.log("Fetching ledger for account:", accountId);
+
+    // Verify account exists and belongs to user
+    const account = await accountModel.findById(accountId);
+
+    if (!account) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Account not found",
+      });
+    }
+
+    if (account.user.toString() !== userId.toString()) {
+      return res.status(403).json({
+        status: "failed",
+        message: "Unauthorized access to this account",
+      });
+    }
+
+    // Get ledger entries with transaction details
+    const ledgerEntries = await ledgerModel
+      .find({ account: accountId })
+      .populate({
+        path: "transaction",
+        populate: [
+          { path: "fromAccount", select: "accountNumber currency user" },
+          { path: "toAccount", select: "accountNumber currency user" },
+        ],
+      })
+      .sort({ createdAt: -1 });
+
+    // Calculate running balance
+    let runningBalance = 0;
+    const ledgerWithBalance = ledgerEntries.reverse().map((entry) => {
+      if (entry.direction === "CREDIT") {
+        runningBalance += entry.amount;
+      } else if (entry.direction === "DEBIT") {
+        runningBalance -= entry.amount;
+      }
+      return {
+        ...entry.toObject(),
+        runningBalance: Number(runningBalance.toFixed(2)),
+      };
+    }).reverse();
+
+    res.status(200).json({
+      status: "success",
+      count: ledgerWithBalance.length,
+      ledger: ledgerWithBalance,
+    });
+  } catch (error) {
+    console.error("Get Ledger Error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+}
+
+// Get all ledger entries for user (across all accounts)
+async function getUserLedgerController(req, res) {
+  try {
+    const userId = req.user._id; // From auth middleware
+
+    console.log("Fetching ledger for user:", userId);
+
+    // Get all user accounts
+    const userAccounts = await accountModel.find({ user: userId }).select("_id");
+    const accountIds = userAccounts.map((acc) => acc._id);
+
+    if (accountIds.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        count: 0,
+        ledger: [],
+      });
+    }
+
+    // Get ledger entries for all user accounts
+    const ledgerEntries = await ledgerModel
+      .find({ account: { $in: accountIds } })
+      .populate("account", "accountNumber currency")
+      .populate({
+        path: "transaction",
+        populate: [
+          { path: "fromAccount", select: "accountNumber currency user" },
+          { path: "toAccount", select: "accountNumber currency user" },
+        ],
+      })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      status: "success",
+      count: ledgerEntries.length,
+      ledger: ledgerEntries,
+    });
+  } catch (error) {
+    console.error("Get User Ledger Error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+}
+
 export {
   createAccountController,
   getUserAccountsController,
@@ -313,4 +426,6 @@ export {
   updateAccountStatusController,
   getUserBalanceController,
   deleteAccountController,
+  getAccountLedgerController,
+  getUserLedgerController,
 };
