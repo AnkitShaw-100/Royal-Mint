@@ -30,7 +30,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Connect to MongoDB
-await connectDB();
+connectDB().catch(err => {
+  console.error("MongoDB connection failed:", err.message);
+});
 
 app.get("/", (req, res) => {
   res.send("API running");
@@ -41,6 +43,11 @@ app.use("/api/users", userRouter);
 app.use("/api/accounts", accountRouter);
 app.use("/api/transactions", transactionRouter);
 
-const PORT = process.env.PORT || 5000;
+// For local development only
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Export for Vercel
+export default app;
