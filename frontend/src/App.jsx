@@ -19,7 +19,7 @@ import AdminPanel from "./pages/AdminPanel";
 import TransactionDetail from "./pages/TransactionDetail";
 import { useSyncUserToDatabase } from "./hooks/useSyncUserToDatabase";
 import { Layout } from "./components/Layout";
-import { Building2 } from "lucide-react";
+import LogoImg from "@/assets/Logo.png";
 import gsap from "gsap";
 
 // Protected Admin Route Component
@@ -121,9 +121,7 @@ function LandingPage() {
   return (
     <div className="w-full px-6 py-4 max-w-7xl mx-auto">
       <div ref={headerRef} className="mb-4 flex items-center gap-3">
-        <div className="bg-linear-to-br from-blue-600 to-indigo-700 p-2 rounded-lg">
-          <Building2 className="w-6 h-6 text-white" />
-        </div>
+        <img src={LogoImg} alt="Royal Mint Logo" className="w-8 h-8 object-contain" />
         <div>
           <h1 className="text-xl font-bold text-gray-900">Royal Mint</h1>
           <p className="text-xs text-gray-500">Online Banking</p>

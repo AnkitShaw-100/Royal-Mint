@@ -19,6 +19,7 @@ import {
   Shield,
 } from "lucide-react";
 import React from "react";
+import LogoImg from "@/assets/Logo.png";
 
 export function Navbar() {
   const navigate = useNavigate();
@@ -67,15 +68,18 @@ export function Navbar() {
             className="flex items-center gap-2 md:gap-3 cursor-pointer group min-w-fit"
             onClick={() => navigate("/")}
           >
-            <div className="bg-linear-to-br from-blue-600 to-indigo-700 p-2 rounded-lg group-hover:shadow-lg transition-all">
-              <Building2 className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            <div className="group-hover:shadow-lg transition-all rounded-lg">
+              <img
+                src={LogoImg}
+                alt="Royal Mint Logo"
+                className="w-8 h-8 md:w-10 md:h-10 object-contain"
+              />
             </div>
             {/* Hide text on sm, show on md+ */}
             <div className="hidden sm:block">
               <h1 className="text-lg md:text-xl font-bold text-gray-900 leading-tight">
                 Royal Mint
               </h1>
-              <p className="text-xs text-gray-500">Banking</p>
             </div>
           </div>
 

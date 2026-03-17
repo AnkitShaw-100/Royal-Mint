@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeftRight,
   History,
@@ -39,311 +38,269 @@ function Home() {
       description: "Send money to other accounts quickly",
       icon: ArrowLeftRight,
       path: "/transfer",
-      color: "bg-orange-600",
+      color: "bg-orange-500",
+      gradientFrom: "from-orange-500",
+      gradientTo: "to-orange-600",
       badge: "Send",
+      accent: "text-orange-600",
+      lightBg: "bg-orange-50",
     },
     {
       title: "Ledger History",
       description: "Review your complete ledger entries",
       icon: History,
       path: "/history",
-      color: "bg-pink-600",
+      color: "bg-pink-500",
+      gradientFrom: "from-pink-500",
+      gradientTo: "to-pink-600",
       badge: "Records",
+      accent: "text-pink-600",
+      lightBg: "bg-pink-50",
     },
     {
       title: "Accounts",
       description: "Manage your bank accounts",
       icon: Receipt,
       path: "/accounts",
-      color: "bg-violet-600",
+      color: "bg-violet-500",
+      gradientFrom: "from-violet-500",
+      gradientTo: "to-violet-600",
       badge: "Manage",
+      accent: "text-violet-600",
+      lightBg: "bg-violet-50",
     },
   ];
 
   const howItWorks = [
     {
-      step: "1",
+      step: "01",
       title: "Create Account",
       description: "Sign up in minutes with secure authentication",
       icon: Users,
     },
     {
-      step: "2",
+      step: "02",
       title: "Add Funds",
       description: "Link your bank account or card securely",
       icon: CreditCard,
     },
     {
-      step: "3",
+      step: "03",
       title: "Start Transacting",
       description: "Send money instantly to anyone, anywhere",
       icon: Zap,
     },
   ];
 
+  const trustItems = [
+    {
+      icon: CheckCircle2,
+      text: "Bank-Level Security",
+      description:
+        "Passwords encrypted with industry-standard hashing algorithms for maximum protection",
+    },
+    {
+      icon: Shield,
+      text: "Secure Transfers",
+      description:
+        "Send & receive money directly between accounts with complete transparency",
+    },
+    {
+      icon: Star,
+      text: "Real-Time Notifications",
+      description:
+        "Instant email alerts for all transfers - both sent and received",
+    },
+  ];
+
+  const stats = [
+    { value: "10K+", label: "Active Users" },
+    { value: "$50M+", label: "Volume" },
+    { value: "99.9%", label: "Uptime" },
+  ];
+
   return (
-    <div className="space-y-14 pb-12">
-      {/* Hero Section */}
-      <div className="text-center space-y-5 py-8 relative max-w-5xl mx-auto">
-        <Badge className="px-5 py-1.5 text-sm font-semibold bg-blue-100 text-blue-700 border-0 pointer-events-none">
-          <Sparkles className="w-4 h-4 inline mr-2" />
+    <div className="space-y-20 pb-16">
+
+      {/* ── Hero ── */}
+      <section className="relative text-center space-y-6 pt-12 pb-4 max-w-5xl mx-auto overflow-hidden">
+        {/* Soft blurred blobs */}
+        <div className="pointer-events-none absolute -top-20 -left-32 w-72 h-72 bg-blue-100 rounded-full blur-3xl opacity-50" />
+        <div className="pointer-events-none absolute -top-10 -right-24 w-64 h-64 bg-indigo-100 rounded-full blur-3xl opacity-40" />
+
+        <Badge className="inline-flex items-center gap-2 px-5 py-1.5 text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200 rounded-full pointer-events-none">
+          <Sparkles className="w-4 h-4" />
           Welcome to Royal Mint Online Portal
         </Badge>
-        <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
+
+        <h1 className="relative text-5xl md:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight">
           Your Complete Banking
           <br />
           <span className="text-blue-600">Command Center</span>
         </h1>
-        <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+
+        <p className="text-lg md:text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
           Access all your banking services in one secure location. Manage
           accounts, transfer funds, and track your ledger with ease.
         </p>
+
         <div className="flex items-center justify-center gap-4 pt-2">
           <Button
             size="lg"
-            className="bg-blue-600 text-white px-7 py-5 text-base shadow-lg transition-all"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-5 text-base font-semibold rounded-xl shadow-lg shadow-blue-200 transition-all hover:-translate-y-0.5 active:translate-y-0"
             onClick={() => navigate("/dashboard")}
           >
             Get Started
-            <ArrowRight className="w-5 h-5 ml-2" />
+            <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
           <Button
             size="lg"
             variant="outline"
-            className="px-7 py-5 text-base border-2"
+            className="px-8 py-5 text-base font-semibold rounded-xl border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all"
             onClick={() => navigate("/about")}
           >
             Learn More
           </Button>
         </div>
-      </div>
 
-      {/* Navigation Cards */}
-      <div className="space-y-7">
+        {/* Subtle stat strip */}
+        <div className="flex items-center justify-center gap-8 pt-6">
+          {stats.map((s, i) => (
+            <div key={i} className="text-center">
+              <div className="text-2xl font-bold text-gray-900">{s.value}</div>
+              <div className="text-xs text-gray-400 uppercase tracking-widest mt-0.5">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Quick Access ── */}
+      <section className="space-y-10">
         <div className="text-center space-y-3">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
             Quick Access
           </h2>
-          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
             Everything you need to manage your finances, all in one place
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {pages.map((page, index) => {
             const Icon = page.icon;
             return (
               <Card
                 key={index}
-                className="group relative overflow-hidden cursor-pointer transition-all duration-300 border shadow-sm hover:shadow-md hover:border-blue-200"
+                className="group relative overflow-hidden cursor-pointer border border-gray-100 bg-white transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:border-gray-200"
                 onClick={() => navigate(page.path)}
               >
-                <CardHeader className="space-y-3.5 relative pb-3">
+                {/* Top accent bar */}
+                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${page.gradientFrom} ${page.gradientTo} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+
+                <CardHeader className="space-y-5 pb-3 pt-7 px-7">
                   <div className="flex items-start justify-between">
-                    <div
-                      className={`${page.color} p-3 rounded-xl shadow-md transition-transform duration-300`}
-                    >
-                      <Icon className="w-6 h-6 text-white" />
+                    <div className={`${page.lightBg} p-3.5 rounded-2xl transition-all duration-300 group-hover:scale-110`}>
+                      <Icon className={`w-6 h-6 ${page.accent}`} />
                     </div>
-                    <Badge className="text-xs font-semibold bg-blue-600 text-white border-0">
+                    <Badge className="text-xs font-semibold px-3 py-1 bg-gray-100 text-gray-600 border-0 rounded-full">
                       {page.badge}
                     </Badge>
                   </div>
-                  <div>
-                    <CardTitle className="text-xl font-bold transition-colors">
+                  <div className="space-y-1.5">
+                    <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
                       {page.title}
                     </CardTitle>
-                    <CardDescription className="text-sm md:text-base mt-2 leading-relaxed text-gray-600">
+                    <CardDescription className="text-sm text-gray-500 leading-relaxed">
                       {page.description}
                     </CardDescription>
                   </div>
                 </CardHeader>
-                <CardContent className="relative pt-0 pb-4">
-                  <Button
-                    variant="outline"
-                    className="w-full font-semibold text-sm md:text-base transition-all group-hover:border-blue-300 group-hover:text-blue-700"
-                  >
+
+                <CardContent className="px-7 pb-7 pt-2">
+                  <Button className="w-full font-semibold text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
                     Access {page.title}
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </CardContent>
               </Card>
             );
           })}
         </div>
-      </div>
+      </section>
 
-      <Separator className="my-16" />
-
-      {/* How It Works Section */}
-      <div className="space-y-10">
+      {/* ── How It Works ── */}
+      <section className="space-y-10">
         <div className="text-center space-y-3">
-          <Badge className="px-4 py-2 bg-blue-600 text-white border-0">
-            Simple Process
-          </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
             How It Works
           </h2>
-          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto">
             Get started in three simple steps and experience seamless banking
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+          {/* Connector line (desktop only) */}
+          <div className="hidden md:block absolute top-[52px] left-[calc(16.66%+32px)] right-[calc(16.66%+32px)] h-px bg-gradient-to-r from-blue-200 via-blue-300 to-blue-200 z-0" />
+
           {howItWorks.map((item, index) => {
             const Icon = item.icon;
             return (
-              <div key={index} className="relative">
-                <Card className="text-center border transition-all duration-300 h-full">
-                  <CardContent className="pt-10 pb-6 space-y-5">
-                    <div className="relative inline-block">
-                      <div className="absolute inset-0 bg-blue-600 rounded-full blur-xl opacity-20"></div>
-                      <div className="relative bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
-                        <Icon className="w-8 h-8 text-white" />
-                      </div>
-                      <Badge className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center bg-white text-blue-600 font-bold border-2 border-blue-300">
-                        {item.step}
-                      </Badge>
+              <Card
+                key={index}
+                className="relative z-10 text-center border border-gray-100 bg-white hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              >
+                <CardContent className="pt-10 pb-8 space-y-5 px-8">
+                  <div className="relative inline-flex items-center justify-center">
+                    <div className="absolute inset-0 bg-blue-400 rounded-full blur-xl opacity-20 scale-150" />
+                    <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+                      <Icon className="w-7 h-7 text-white" />
                     </div>
-                    <div className="space-y-2">
-                      <h3 className="text-xl font-bold text-gray-900">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm md:text-base text-gray-600">
-                        {item.description}
-                      </p>
+                    <div className="absolute -top-3 -right-3 w-7 h-7 rounded-full bg-white border-2 border-blue-400 flex items-center justify-center shadow-sm">
+                      <span className="text-xs font-bold text-blue-600">{item.step}</span>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-gray-900">{item.title}</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">{item.description}</p>
+                  </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
-      </div>
+      </section>
 
-      <Separator className="my-16" />
-
-      {/* Key Features Section */}
-      <div className="space-y-6">
-        <div className="text-center space-y-3">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Why Choose Royal Mint?
-          </h2>
-          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
-            Experience secure, fast, and reliable banking with features designed
-            for you
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <Lock className="w-6 h-6 text-blue-600" />
-                </div>
-                <CardTitle className="text-lg">Bank-Level Security</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Your funds and data are protected with military-grade encryption
-                and multi-factor authentication
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-3">
-                <div className="bg-green-100 p-3 rounded-lg">
-                  <Zap className="w-6 h-6 text-green-600" />
-                </div>
-                <CardTitle className="text-lg">Instant Transactions</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Send and receive money in seconds with our lightning-fast
-                transaction processing
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-3">
-                <div className="bg-purple-100 p-3 rounded-lg">
-                  <Globe className="w-6 h-6 text-purple-600" />
-                </div>
-                <CardTitle className="text-lg">Global Access</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Transact across 50+ countries without geographical boundaries or
-                restrictions
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-3">
-                <div className="bg-orange-100 p-3 rounded-lg">
-                  <HeadphonesIcon className="w-6 h-6 text-orange-600" />
-                </div>
-                <CardTitle className="text-lg">24/7 Support</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Our dedicated support team is always available to help you with
-                any questions
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      <Separator className="my-16" />
-
-      {/* Trust Indicators */}
-      <div className="py-12">
-        <div className="text-center space-y-7">
+      {/* ── Trust Indicators ── */}
+      <section className="py-4">
+        <div className="text-center space-y-10">
           <div className="space-y-3">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
               Trusted by Thousands
             </h2>
-            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
-              Join the community of satisfied users who trust us with their
-              finances
+            <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto">
+              Join the community of satisfied users who trust us with their finances
             </p>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {[
-              {
-                icon: CheckCircle2,
-                text: "Bank-Level Security",
-                description: "256-bit encryption",
-              },
-              {
-                icon: Shield,
-                text: "Data Protection",
-                description: "GDPR compliant",
-              },
-              { icon: Star, text: "5-Star Rated", description: "10K+ reviews" },
-            ].map((item, index) => {
+            {trustItems.map((item, index) => {
               const Icon = item.icon;
               return (
                 <div
                   key={index}
-                  className="bg-white border border-gray-100 hover:border-blue-300 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
+                  className="group relative bg-white border border-gray-100 rounded-2xl p-7 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-blue-100 text-left"
                 >
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="bg-linear-to-br from-blue-50 to-indigo-50 p-3 rounded-xl group-hover:from-blue-100 group-hover:to-indigo-100 transition-all">
-                      <Icon className="w-7 h-7 text-blue-600" />
+                  {/* Hover glow */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50/50 to-indigo-50/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                  <div className="relative space-y-4">
+                    <div className="inline-flex p-3 rounded-xl bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                      <Icon className="w-6 h-6 text-blue-600" />
                     </div>
-                    <div className="space-y-2">
-                      <h3 className="font-bold text-gray-900 text-base md:text-lg">
-                        {item.text}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {item.description}
-                      </p>
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-lg mb-1">{item.text}</h3>
+                      <p className="text-sm text-gray-500 leading-relaxed">{item.description}</p>
                     </div>
                   </div>
                 </div>
@@ -351,17 +308,18 @@ function Home() {
             })}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* CTA Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-blue-600 to-indigo-600">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-white rounded-full -mr-40 -mt-40"></div>
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-white rounded-full -ml-40 -mb-40"></div>
-        </div>
-        <div className="relative text-center py-16 px-6 md:px-8 space-y-8">
-          <div className="space-y-3 max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+      {/* ── CTA Banner ── */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-600 to-indigo-700 shadow-2xl shadow-blue-200">
+        {/* Decorative circles */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-48 -mt-48" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full -ml-48 -mb-48" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-3xl" />
+
+        <div className="relative text-center py-16 px-6 md:px-12 space-y-10">
+          <div className="space-y-4 max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight tracking-tight">
               Ready to Take Control
               <br />
               of Your Finances?
@@ -371,40 +329,37 @@ function Home() {
               securely and efficiently with Royal Mint.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+
+          {/* Stats row inside CTA */}
+          <div className="grid grid-cols-3 gap-6 max-w-lg mx-auto">
+            {stats.map((s, i) => (
+              <div key={i} className="text-white space-y-1">
+                <div className="text-2xl md:text-3xl font-extrabold">{s.value}</div>
+                <div className="text-xs text-blue-200 uppercase tracking-widest">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <Button
               size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-base font-semibold shadow-xl hover:shadow-2xl transition-all"
+              className="bg-white text-blue-700 hover:bg-blue-50 font-bold px-8 py-5 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 text-base min-w-44"
               onClick={() => navigate("/dashboard")}
             >
-              Get Started Now
-              <ArrowRight className="w-5 h-5 ml-2" />
+              Get Started
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
               size="lg"
-              className="border-2 border-white text-white px-8 py-6 text-base font-semibold backdrop-blur-sm"
+              variant="outline"
+              className="border-2 border-white/40 text-white hover:bg-white/10 px-8 py-5 rounded-xl font-semibold text-base min-w-44 transition-all"
               onClick={() => navigate("/about")}
             >
               Learn More
-              <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </div>
-          <div className="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-2xl mx-auto">
-            <div className="text-white space-y-1">
-              <div className="text-2xl md:text-3xl font-bold">10K+</div>
-              <div className="text-sm text-blue-100">Active Users</div>
-            </div>
-            <div className="text-white space-y-1">
-              <div className="text-2xl md:text-3xl font-bold">$50M+</div>
-              <div className="text-sm text-blue-100">Volume</div>
-            </div>
-            <div className="text-white space-y-1">
-              <div className="text-2xl md:text-3xl font-bold">99.9%</div>
-              <div className="text-sm text-blue-100">Uptime</div>
-            </div>
-          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

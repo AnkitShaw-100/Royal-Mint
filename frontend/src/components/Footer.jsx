@@ -1,8 +1,8 @@
 import { SignedIn } from '@clerk/clerk-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import LogoImg from '@/assets/Logo.png'
 import { 
-  Building2,
   Mail,
   Phone,
   MapPin,
@@ -60,9 +60,7 @@ export function Footer() {
           {/* Brand Section */}
           <div className="md:col-span-2 lg:col-span-1 space-y-3 md:space-y-4">
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-lg">
-                <Building2 className="w-5 h-5 md:w-6 md:h-6 text-white" />
-              </div>
+              <img src={LogoImg} alt="Royal Mint Logo" className="w-6 h-6 md:w-8 md:h-8 object-contain" />
               <div>
                 <h3 className="text-base md:text-lg font-bold">Royal Mint</h3>
                 <p className="text-xs text-gray-400">Online Banking</p>
