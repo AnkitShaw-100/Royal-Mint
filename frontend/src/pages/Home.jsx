@@ -195,7 +195,7 @@ function Home() {
                 onClick={() => navigate(page.path)}
               >
                 {/* Top accent bar */}
-                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${page.gradientFrom} ${page.gradientTo} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                <div className={`absolute top-0 left-0 right-0 h-1 bg-linear-to-r ${page.gradientFrom} ${page.gradientTo} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
 
                 <CardHeader className="space-y-5 pb-3 pt-7 px-7">
                   <div className="flex items-start justify-between">
@@ -241,7 +241,7 @@ function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
           {/* Connector line (desktop only) */}
-          <div className="hidden md:block absolute top-[52px] left-[calc(16.66%+32px)] right-[calc(16.66%+32px)] h-px bg-gradient-to-r from-blue-200 via-blue-300 to-blue-200 z-0" />
+          <div className="hidden md:block absolute top-13 left-[calc(16.66%+32px)] right-[calc(16.66%+32px)] h-px bg-linear-to-r from-blue-200 via-blue-300 to-blue-200 z-0" />
 
           {howItWorks.map((item, index) => {
             const Icon = item.icon;
@@ -253,7 +253,7 @@ function Home() {
                 <CardContent className="pt-10 pb-8 space-y-5 px-8">
                   <div className="relative inline-flex items-center justify-center">
                     <div className="absolute inset-0 bg-blue-400 rounded-full blur-xl opacity-20 scale-150" />
-                    <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+                    <div className="relative bg-linear-to-br from-blue-500 to-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
                       <Icon className="w-7 h-7 text-white" />
                     </div>
                     <div className="absolute -top-3 -right-3 w-7 h-7 rounded-full bg-white border-2 border-blue-400 flex items-center justify-center shadow-sm">
@@ -292,7 +292,7 @@ function Home() {
                   className="group relative bg-white border border-gray-100 rounded-2xl p-7 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-blue-100 text-left"
                 >
                   {/* Hover glow */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50/50 to-indigo-50/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  <div className="absolute inset-0 rounded-2xl bg-linear-to-br from-blue-50/50 to-indigo-50/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                   <div className="relative space-y-4">
                     <div className="inline-flex p-3 rounded-xl bg-blue-50 group-hover:bg-blue-100 transition-colors">
@@ -311,11 +311,11 @@ function Home() {
       </section>
 
       {/* ── CTA Banner ── */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-600 to-indigo-700 shadow-2xl shadow-blue-200">
+      <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-600 via-blue-600 to-indigo-700 shadow-2xl shadow-blue-200">
         {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-48 -mt-48" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full -ml-48 -mb-48" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 bg-indigo-500/10 rounded-full blur-3xl" />
 
         <div className="relative text-center py-16 px-6 md:px-12 space-y-10">
           <div className="space-y-4 max-w-3xl mx-auto">
