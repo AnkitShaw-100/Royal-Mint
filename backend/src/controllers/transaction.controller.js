@@ -2,7 +2,8 @@ import transactionModel from "../models/transaction.model.js";
 import accountModel from "../models/account.model.js";
 import ledgerModel from "../models/ledger.model.js";
 import {
-  sendTransactionNotification,
+  sendMoneySentEmail,
+  sendMoneyReceivedEmail,
   sendFailedTransactionNotification,
 } from "../services/email.service.js";
 import mongoose from "mongoose";
@@ -70,7 +71,9 @@ async function createTransactionController(req, res) {
     }
 
     // Verify destination account exists
-    const toAccountDoc = await accountModel.findById(toAccount);
+    const toAccountDoc = await accountModel
+      .findById(toAccount)
+      .populate("user", "email firstName lastName");
     if (!toAccountDoc) {
       return res.status(404).json({
         status: "failed",
@@ -133,7 +136,7 @@ async function createTransactionController(req, res) {
 
     const derivedSenderBalance = senderLedgerAggregation[0]?.balance ?? 0;
 
-    if (Number(amount) > derivedSenderBalance && derivedSenderBalance > 0) {
+    if (Number(amount) > derivedSenderBalance) {
       return res.status(400).json({
         status: "failed",
         message: "Insufficient sender balance",
@@ -205,17 +208,47 @@ async function createTransactionController(req, res) {
       { path: "toAccount", populate: { path: "user", select: "email firstName lastName" } },
     ]);
 
-    // Step 10: Send email notification (non-blocking for transaction success)
+    // Step 10: Send sender/receiver email notifications (non-blocking)
     try {
-      await sendTransactionNotification({
+      const senderName = [req.user.firstName, req.user.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+
+      await sendMoneySentEmail({
         to: req.user.email,
+        senderName: senderName || req.user.email,
+        recipientName:
+          [toAccountDoc.user?.firstName, toAccountDoc.user?.lastName]
+            .filter(Boolean)
+            .join(" ")
+            .trim() || toAccountDoc.user?.email,
+        recipientEmail: toAccountDoc.user?.email,
         transactionId: populatedTransaction._id,
         amount: populatedTransaction.amount,
         currency: fromAccountDoc.currency,
-        status: populatedTransaction.status,
       });
+
+      if (toAccountDoc.user?.email) {
+        await sendMoneyReceivedEmail({
+          to: toAccountDoc.user.email,
+          recipientName:
+            [toAccountDoc.user?.firstName, toAccountDoc.user?.lastName]
+              .filter(Boolean)
+              .join(" ")
+              .trim() || toAccountDoc.user.email,
+          senderName: senderName || req.user.email,
+          senderEmail: req.user.email,
+          transactionId: populatedTransaction._id,
+          amount: populatedTransaction.amount,
+          currency: toAccountDoc.currency,
+        });
+      }
     } catch (emailError) {
-      console.warn("Transaction created but notification email failed:", emailError.message);
+      console.warn(
+        "Transaction created but notification email failed:",
+        emailError.message,
+      );
     }
 
     res.status(201).json({

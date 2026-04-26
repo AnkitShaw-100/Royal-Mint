@@ -193,6 +193,80 @@ async function sendTransactionNotification({
   });
 }
 
+// Send sender debit notification
+async function sendMoneySentEmail({
+  to,
+  senderName,
+  recipientName,
+  recipientEmail,
+  transactionId,
+  amount,
+  currency,
+}) {
+  const fromName = process.env.EMAILJS_FROM_NAME || "Royal Mint";
+  const replyTo = process.env.EMAILJS_REPLY_TO || "support@royalmint.com";
+
+  const templateParams = {
+    to_email: to,
+    to_name: senderName || to,
+    from_name: fromName,
+    reply_to: replyTo,
+    transactionId: String(transactionId),
+    transaction_id: String(transactionId),
+    amountValue: Number(amount).toFixed(2),
+    amount: Number(amount).toFixed(2),
+    currency,
+    status: "DEBITED",
+    counterparty_name: recipientName || recipientEmail || "Recipient",
+    counterparty_email: recipientEmail || "",
+    app_name: "Royal Mint",
+    email_type: "money_sent",
+    subject: "Money sent successfully",
+  };
+
+  return await sendEmail({
+    templateParams,
+    emailType: "transaction",
+  });
+}
+
+// Send recipient credit notification
+async function sendMoneyReceivedEmail({
+  to,
+  recipientName,
+  senderName,
+  senderEmail,
+  transactionId,
+  amount,
+  currency,
+}) {
+  const fromName = process.env.EMAILJS_FROM_NAME || "Royal Mint";
+  const replyTo = process.env.EMAILJS_REPLY_TO || "support@royalmint.com";
+
+  const templateParams = {
+    to_email: to,
+    to_name: recipientName || to,
+    from_name: fromName,
+    reply_to: replyTo,
+    transactionId: String(transactionId),
+    transaction_id: String(transactionId),
+    amountValue: Number(amount).toFixed(2),
+    amount: Number(amount).toFixed(2),
+    currency,
+    status: "CREDITED",
+    counterparty_name: senderName || senderEmail || "Sender",
+    counterparty_email: senderEmail || "",
+    app_name: "Royal Mint",
+    email_type: "money_received",
+    subject: "You received money",
+  };
+
+  return await sendEmail({
+    templateParams,
+    emailType: "transaction",
+  });
+}
+
 // Send failed transaction notification
 async function sendFailedTransactionNotification({
   to,
@@ -230,5 +304,7 @@ async function sendFailedTransactionNotification({
 export {
   sendRegistrationEmail,
   sendTransactionNotification,
+  sendMoneySentEmail,
+  sendMoneyReceivedEmail,
   sendFailedTransactionNotification,
 };

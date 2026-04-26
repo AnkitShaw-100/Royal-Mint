@@ -1,47 +1,196 @@
 import accountModel from "../models/account.model.js";
 import userModel from "../models/user.model.js";
 import ledgerModel from "../models/ledger.model.js";
+import transactionModel from "../models/transaction.model.js";
 import mongoose from "mongoose";
+
+const WELCOME_BONUS_AMOUNT = 10000;
+
+async function getAccountBalance(accountId, session = null) {
+  const pipeline = [
+    {
+      $match: {
+        account: new mongoose.Types.ObjectId(accountId),
+      },
+    },
+    {
+      $group: {
+        _id: "$account",
+        totalDebits: {
+          $sum: {
+            $cond: [{ $eq: ["$direction", "DEBIT"] }, "$amount", 0],
+          },
+        },
+        totalCredits: {
+          $sum: {
+            $cond: [{ $eq: ["$direction", "CREDIT"] }, "$amount", 0],
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        balance: { $subtract: ["$totalCredits", "$totalDebits"] },
+      },
+    },
+  ];
+
+  const [result] = await ledgerModel.aggregate(pipeline).session(session);
+  return Number(result?.balance ?? 0);
+}
+
+async function ensurePlatformFundingAccount(currency = "INR", session) {
+  let systemUser = await userModel.findOne({ isSystemUser: true }).session(session);
+
+  if (!systemUser) {
+    systemUser = await userModel.create(
+      [
+        {
+          clerkId: "__system__royal_mint__",
+          email: "system@royalmint.local",
+          firstName: "Royal",
+          lastName: "Mint System",
+          isSystemUser: true,
+        },
+      ],
+      { session },
+    ).then((docs) => docs[0]);
+  }
+
+  let fundingAccount = await accountModel
+    .findOne({ user: systemUser._id, currency, status: "ACTIVE" })
+    .session(session);
+
+  if (!fundingAccount) {
+    fundingAccount = await accountModel.create(
+      [
+        {
+          user: systemUser._id,
+          currency,
+          status: "ACTIVE",
+        },
+      ],
+      { session },
+    ).then((docs) => docs[0]);
+  }
+
+  const fundingBalance = await getAccountBalance(fundingAccount._id, session);
+  if (fundingBalance < WELCOME_BONUS_AMOUNT) {
+    const topupAmount = WELCOME_BONUS_AMOUNT - fundingBalance;
+    const bootstrapTxn = await transactionModel.create(
+      [
+        {
+          fromAccount: fundingAccount._id,
+          toAccount: fundingAccount._id,
+          amount: topupAmount,
+          status: "COMPLETED",
+          idempotencyKey: `SYSTEM_TOPUP_${fundingAccount._id}_${Date.now()}`,
+        },
+      ],
+      { session },
+    ).then((docs) => docs[0]);
+
+    await ledgerModel.create(
+      [
+        {
+          account: fundingAccount._id,
+          transaction: bootstrapTxn._id,
+          direction: "CREDIT",
+          amount: topupAmount,
+          currency,
+          note: "System reserve top-up",
+        },
+      ],
+      { session },
+    );
+  }
+
+  return fundingAccount;
+}
 
 // Create new account for user
 async function createAccountController(req, res) {
+  let session;
   try {
     const { currency = "INR", status = "ACTIVE" } = req.body;
     const userId = req.user._id; // From auth middleware
 
     console.log("Creating account for user:", userId, { currency, status });
 
-    // Check if user already has account
-    const existingAccount = await accountModel.findOne({ user: userId });
-    if (existingAccount) {
-      // Return existing account instead of error
-      const populatedAccount = await existingAccount.populate("user", "email firstName lastName profileImage");
-      console.log("User already has an account, returning existing:", existingAccount._id);
-      
-      return res.status(200).json({
-        status: "success",
-        message: "Account already exists",
-        account: populatedAccount,
-        alreadyExists: true,
-      });
-    }
+    session = await mongoose.startSession();
+    let account;
+    let welcomeTransaction;
 
-    // Create new account
-    const account = await accountModel.create({
-      user: userId,
-      currency,
-      status,
+    await session.withTransaction(async () => {
+      // Create new account (users can have multiple accounts)
+      account = await accountModel.create(
+        [
+          {
+            user: userId,
+            currency,
+            status,
+          },
+        ],
+        { session },
+      ).then((docs) => docs[0]);
+
+      const fundingAccount = await ensurePlatformFundingAccount(currency, session);
+
+      // Record the onboarding bonus as a real transaction + ledger pair
+      welcomeTransaction = await transactionModel.create(
+        [
+          {
+            fromAccount: fundingAccount._id,
+            toAccount: account._id,
+            amount: WELCOME_BONUS_AMOUNT,
+            status: "COMPLETED",
+            idempotencyKey: `WELCOME_BONUS_${account._id}`,
+          },
+        ],
+        { session },
+      ).then((docs) => docs[0]);
+
+      await ledgerModel.create(
+        [
+          {
+            account: fundingAccount._id,
+            transaction: welcomeTransaction._id,
+            direction: "DEBIT",
+            amount: WELCOME_BONUS_AMOUNT,
+            currency,
+            note: "Welcome bonus disbursed",
+          },
+          {
+            account: account._id,
+            transaction: welcomeTransaction._id,
+            direction: "CREDIT",
+            amount: WELCOME_BONUS_AMOUNT,
+            currency,
+            note: "Welcome bonus credited (INR 10,000)",
+          },
+        ],
+        { session, ordered: true },
+      );
     });
 
     // Populate user details
-    const populatedAccount = await account.populate("user", "email firstName lastName profileImage");
+    const populatedAccount = await account.populate(
+      "user",
+      "email firstName lastName profileImage",
+    );
 
     console.log("Account created successfully:", account._id);
 
     res.status(201).json({
       status: "success",
-      message: "Account created successfully",
+      message: "Account created successfully with welcome bonus",
       account: populatedAccount,
+      welcomeBonus: {
+        amount: WELCOME_BONUS_AMOUNT,
+        currency,
+        transactionId: welcomeTransaction?._id,
+      },
     });
   } catch (error) {
     console.error("Create Account Error:", error);
@@ -50,6 +199,10 @@ async function createAccountController(req, res) {
       message: "Internal server error",
       error: error.message,
     });
+  } finally {
+    if (session) {
+      await session.endSession();
+    }
   }
 }
 
@@ -242,7 +395,7 @@ async function getUserBalanceController(req, res) {
     const balance = {
       accountId: account._id,
       currency: account.currency,
-      balance: Number(calculatedBalance).toFixed(2),
+      balance: Number(calculatedBalance),
       lastUpdated: new Date(),
     };
 
