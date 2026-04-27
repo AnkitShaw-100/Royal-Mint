@@ -34,18 +34,24 @@ const allowedOrigins = [
   .map(normalizeOrigin)
   .filter(Boolean);
 
-// Middleware
+console.log("Allowed Origins:", allowedOrigins);
+
+// Middleware - CORS must be first
 app.use(
   cors({
     origin(origin, callback) {
       if (!origin) return callback(null, true);
 
       const normalizedOrigin = normalizeOrigin(origin);
+      console.log("CORS check - Origin:", origin, "Normalized:", normalizedOrigin, "Allowed:", allowedOrigins.includes(normalizedOrigin));
+      
       if (allowedOrigins.includes(normalizedOrigin)) {
         return callback(null, true);
       }
 
-      return callback(new Error(`CORS blocked for origin: ${origin}`));
+      const err = new Error(`CORS blocked for origin: ${origin}`);
+      err.status = 403;
+      return callback(err);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -56,14 +62,45 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Connect to MongoDB
-connectDB().catch((err) => {
-  console.error("MongoDB connection failed:", err.message);
+// Error handling middleware for CORS errors
+app.use((err, req, res, next) => {
+  if (err.status === 403) {
+    return res.status(403).json({
+      status: "error",
+      message: err.message,
+    });
+  }
+  next(err);
 });
 
+// Connect to MongoDB
+let dbConnected = false;
+connectDB()
+  .then(() => {
+    dbConnected = true;
+    console.log("MongoDB connection successful");
+  })
+  .catch((err) => {
+    console.error("MongoDB connection failed:", err.message);
+  });
+
 app.get("/", (req, res) => {
-  res.send("API running");
+  res.json({
+    status: "ok",
+    message: "API running",
+    mongoConnected: dbConnected,
+  });
 });
+
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    mongoConnected: dbConnected,
+  });
+});
+
+// Handle preflight requests
+app.options("*", cors());
 
 // Routes
 app.use("/api/users", userRouter);
@@ -74,6 +111,22 @@ app.use("/api/transactions", transactionRouter);
 app.use("/users", userRouter);
 app.use("/accounts", accountRouter);
 app.use("/transactions", transactionRouter);
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err.message, err.stack);
+  
+  // If headers already sent, delegate to default handler
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  res.status(err.status || 500).json({
+    status: "error",
+    message: err.message || "Internal server error",
+    ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
+  });
+});
 
 // For local development only
 if (process.env.NODE_ENV !== "production") {

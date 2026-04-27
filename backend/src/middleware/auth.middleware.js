@@ -37,7 +37,7 @@ async function authMiddleware(req, res, next) {
     console.log("User authenticated:", user.email);
     next();
   } catch (error) {
-    console.error("Auth Middleware Error:", error);
+    console.error("Auth Middleware Error:", error.message, error.stack);
     res.status(500).json({
       status: "error",
       message: "Authentication error",
