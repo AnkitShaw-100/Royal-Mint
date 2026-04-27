@@ -20,7 +20,7 @@ function immutableLedgerPlugin(schema) {
     schema.pre(operation, async function () {
       if (shouldEnforce()) {
         throw new Error(
-          "Ledger entries are immutable. Create reversal entries instead of update/delete."
+          "Ledger entries are immutable. Create reversal entries instead of update/delete.",
         );
       }
     });
@@ -30,7 +30,7 @@ function immutableLedgerPlugin(schema) {
   schema.pre("save", async function () {
     if (shouldEnforce() && !this.isNew) {
       throw new Error(
-        "Ledger entries are immutable. Create reversal entries instead of update/delete."
+        "Ledger entries are immutable. Create reversal entries instead of update/delete.",
       );
     }
   });

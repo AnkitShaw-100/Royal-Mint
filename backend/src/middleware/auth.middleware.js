@@ -65,7 +65,7 @@ async function systemUserMiddleware(req, res, next) {
     if (!req.user.isSystemUser) {
       console.log(
         "Access denied - User is not a system admin:",
-        req.user.email
+        req.user.email,
       );
       return res.status(403).json({
         status: "failed",

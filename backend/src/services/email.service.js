@@ -25,7 +25,7 @@ function postJson(urlString, payload) {
             body,
           });
         });
-      }
+      },
     );
 
     req.on("error", reject);
@@ -42,7 +42,8 @@ async function sendEmail({ templateParams, emailType = "general" }) {
     transaction: process.env.EMAILJS_TEMPLATE_ID_TRANSACTION,
     failed_transaction: process.env.EMAILJS_TEMPLATE_ID_FAILED_TRANSACTION,
   };
-  const templateId = templateIdByType[emailType] || process.env.EMAILJS_TEMPLATE_ID;
+  const templateId =
+    templateIdByType[emailType] || process.env.EMAILJS_TEMPLATE_ID;
   const publicKey = process.env.EMAILJS_PUBLIC_KEY;
   const privateKey = process.env.EMAILJS_PRIVATE_KEY;
 
@@ -87,7 +88,10 @@ async function sendEmail({ templateParams, emailType = "general" }) {
   }
 
   try {
-    const response = await postJson("https://api.emailjs.com/api/v1.0/email/send", payload);
+    const response = await postJson(
+      "https://api.emailjs.com/api/v1.0/email/send",
+      payload,
+    );
 
     if (!response.ok) {
       if (
@@ -96,7 +100,7 @@ async function sendEmail({ templateParams, emailType = "general" }) {
         response.body.toLowerCase().includes("non-browser applications")
       ) {
         console.warn(
-          `Skipping ${emailType} email: EmailJS account currently blocks server-side API calls.`
+          `Skipping ${emailType} email: EmailJS account currently blocks server-side API calls.`,
         );
         return {
           delivered: false,
@@ -105,15 +109,22 @@ async function sendEmail({ templateParams, emailType = "general" }) {
         };
       }
 
-      const responseBody = typeof response.body === "string" ? response.body.trim() : "";
-      const compactDetails = responseBody.length > 400 ? `${responseBody.slice(0, 400)}...` : responseBody;
+      const responseBody =
+        typeof response.body === "string" ? response.body.trim() : "";
+      const compactDetails =
+        responseBody.length > 400
+          ? `${responseBody.slice(0, 400)}...`
+          : responseBody;
 
-      console.warn(`Skipping ${emailType} email: EmailJS send failed (${response.status})`, {
-        templateId,
-        serviceId,
-        to: templateParams?.to_email,
-        details: compactDetails || "No response body",
-      });
+      console.warn(
+        `Skipping ${emailType} email: EmailJS send failed (${response.status})`,
+        {
+          templateId,
+          serviceId,
+          to: templateParams?.to_email,
+          details: compactDetails || "No response body",
+        },
+      );
       return {
         delivered: false,
         skipped: true,
@@ -130,7 +141,9 @@ async function sendEmail({ templateParams, emailType = "general" }) {
       delivered: true,
     };
   } catch (error) {
-    console.warn(`Skipping ${emailType} email due to provider/network error: ${error.message}`);
+    console.warn(
+      `Skipping ${emailType} email due to provider/network error: ${error.message}`,
+    );
     return {
       delivered: false,
       skipped: true,

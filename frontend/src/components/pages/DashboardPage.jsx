@@ -23,6 +23,15 @@ export function DashboardPage() {
   );
 }
 
+function getAccountId(accountRef) {
+  if (!accountRef) return null;
+  if (typeof accountRef === "string") return accountRef;
+  if (typeof accountRef === "object" && "_id" in accountRef) {
+    return String(accountRef._id);
+  }
+  return null;
+}
+
 function Dashboard() {
   const { user } = useUser();
   useSyncUser();
@@ -213,8 +222,11 @@ function AccountCard({ account, balance }) {
   );
 }
 function TxnRow({ txn, accounts }) {
-  const isOutgoing = accounts.some((a) => a._id === txn.fromAccount);
+  const fromAccountId = getAccountId(txn.fromAccount);
+  const toAccountId = getAccountId(txn.toAccount);
+  const isOutgoing = accounts.some((a) => a._id === fromAccountId);
   const Icon = isOutgoing ? ArrowUpRight : ArrowDownLeft;
+  const relevantAccountId = isOutgoing ? fromAccountId : toAccountId;
   return (
     <div className="flex items-center justify-between p-4">
       <div className="flex items-center gap-3">
@@ -230,6 +242,12 @@ function TxnRow({ txn, accounts }) {
           <p className="text-xs text-muted-foreground">
             {new Date(txn.createdAt).toLocaleString()}
           </p>
+          {relevantAccountId && (
+            <p className="text-[10px] text-muted-foreground">
+              {isOutgoing ? "From" : "To"} ••••
+              {String(relevantAccountId).slice(-6).toUpperCase()}
+            </p>
+          )}
         </div>
       </div>
       <div className="text-right">

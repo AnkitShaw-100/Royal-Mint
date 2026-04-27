@@ -40,7 +40,7 @@ const ledgerSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 ledgerSchema.plugin(immutableLedgerPlugin);

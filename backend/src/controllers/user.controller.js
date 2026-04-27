@@ -53,7 +53,10 @@ async function saveOrUpdateUserController(req, res) {
           lastName: lastName || "",
         });
       } catch (emailError) {
-        console.warn("User saved but registration email failed:", emailError.message);
+        console.warn(
+          "User saved but registration email failed:",
+          emailError.message,
+        );
       }
     }
 

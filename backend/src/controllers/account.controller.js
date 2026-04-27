@@ -41,21 +41,25 @@ async function getAccountBalance(accountId, session = null) {
 }
 
 async function ensurePlatformFundingAccount(currency = "INR", session) {
-  let systemUser = await userModel.findOne({ isSystemUser: true }).session(session);
+  let systemUser = await userModel
+    .findOne({ isSystemUser: true })
+    .session(session);
 
   if (!systemUser) {
-    systemUser = await userModel.create(
-      [
-        {
-          clerkId: "__system__royal_mint__",
-          email: "system@royalmint.local",
-          firstName: "Royal",
-          lastName: "Mint System",
-          isSystemUser: true,
-        },
-      ],
-      { session },
-    ).then((docs) => docs[0]);
+    systemUser = await userModel
+      .create(
+        [
+          {
+            clerkId: "__system__royal_mint__",
+            email: "system@royalmint.local",
+            firstName: "Royal",
+            lastName: "Mint System",
+            isSystemUser: true,
+          },
+        ],
+        { session },
+      )
+      .then((docs) => docs[0]);
   }
 
   let fundingAccount = await accountModel
@@ -63,33 +67,37 @@ async function ensurePlatformFundingAccount(currency = "INR", session) {
     .session(session);
 
   if (!fundingAccount) {
-    fundingAccount = await accountModel.create(
-      [
-        {
-          user: systemUser._id,
-          currency,
-          status: "ACTIVE",
-        },
-      ],
-      { session },
-    ).then((docs) => docs[0]);
+    fundingAccount = await accountModel
+      .create(
+        [
+          {
+            user: systemUser._id,
+            currency,
+            status: "ACTIVE",
+          },
+        ],
+        { session },
+      )
+      .then((docs) => docs[0]);
   }
 
   const fundingBalance = await getAccountBalance(fundingAccount._id, session);
   if (fundingBalance < WELCOME_BONUS_AMOUNT) {
     const topupAmount = WELCOME_BONUS_AMOUNT - fundingBalance;
-    const bootstrapTxn = await transactionModel.create(
-      [
-        {
-          fromAccount: fundingAccount._id,
-          toAccount: fundingAccount._id,
-          amount: topupAmount,
-          status: "COMPLETED",
-          idempotencyKey: `SYSTEM_TOPUP_${fundingAccount._id}_${Date.now()}`,
-        },
-      ],
-      { session },
-    ).then((docs) => docs[0]);
+    const bootstrapTxn = await transactionModel
+      .create(
+        [
+          {
+            fromAccount: fundingAccount._id,
+            toAccount: fundingAccount._id,
+            amount: topupAmount,
+            status: "COMPLETED",
+            idempotencyKey: `SYSTEM_TOPUP_${fundingAccount._id}_${Date.now()}`,
+          },
+        ],
+        { session },
+      )
+      .then((docs) => docs[0]);
 
     await ledgerModel.create(
       [
@@ -124,32 +132,39 @@ async function createAccountController(req, res) {
 
     await session.withTransaction(async () => {
       // Create new account (users can have multiple accounts)
-      account = await accountModel.create(
-        [
-          {
-            user: userId,
-            currency,
-            status,
-          },
-        ],
-        { session },
-      ).then((docs) => docs[0]);
+      account = await accountModel
+        .create(
+          [
+            {
+              user: userId,
+              currency,
+              status,
+            },
+          ],
+          { session },
+        )
+        .then((docs) => docs[0]);
 
-      const fundingAccount = await ensurePlatformFundingAccount(currency, session);
+      const fundingAccount = await ensurePlatformFundingAccount(
+        currency,
+        session,
+      );
 
       // Record the onboarding bonus as a real transaction + ledger pair
-      welcomeTransaction = await transactionModel.create(
-        [
-          {
-            fromAccount: fundingAccount._id,
-            toAccount: account._id,
-            amount: WELCOME_BONUS_AMOUNT,
-            status: "COMPLETED",
-            idempotencyKey: `WELCOME_BONUS_${account._id}`,
-          },
-        ],
-        { session },
-      ).then((docs) => docs[0]);
+      welcomeTransaction = await transactionModel
+        .create(
+          [
+            {
+              fromAccount: fundingAccount._id,
+              toAccount: account._id,
+              amount: WELCOME_BONUS_AMOUNT,
+              status: "COMPLETED",
+              idempotencyKey: `WELCOME_BONUS_${account._id}`,
+            },
+          ],
+          { session },
+        )
+        .then((docs) => docs[0]);
 
       await ledgerModel.create(
         [
@@ -314,7 +329,10 @@ async function updateAccountStatusController(req, res) {
     account.status = status;
     await account.save();
 
-    const populatedAccount = await account.populate("user", "email firstName lastName profileImage");
+    const populatedAccount = await account.populate(
+      "user",
+      "email firstName lastName profileImage",
+    );
 
     console.log("Account status updated:", accountId);
 
@@ -497,17 +515,20 @@ async function getAccountLedgerController(req, res) {
 
     // Calculate running balance
     let runningBalance = 0;
-    const ledgerWithBalance = ledgerEntries.reverse().map((entry) => {
-      if (entry.direction === "CREDIT") {
-        runningBalance += entry.amount;
-      } else if (entry.direction === "DEBIT") {
-        runningBalance -= entry.amount;
-      }
-      return {
-        ...entry.toObject(),
-        runningBalance: Number(runningBalance.toFixed(2)),
-      };
-    }).reverse();
+    const ledgerWithBalance = ledgerEntries
+      .reverse()
+      .map((entry) => {
+        if (entry.direction === "CREDIT") {
+          runningBalance += entry.amount;
+        } else if (entry.direction === "DEBIT") {
+          runningBalance -= entry.amount;
+        }
+        return {
+          ...entry.toObject(),
+          runningBalance: Number(runningBalance.toFixed(2)),
+        };
+      })
+      .reverse();
 
     res.status(200).json({
       status: "success",
@@ -532,7 +553,9 @@ async function getUserLedgerController(req, res) {
     console.log("Fetching ledger for user:", userId);
 
     // Get all user accounts
-    const userAccounts = await accountModel.find({ user: userId }).select("_id");
+    const userAccounts = await accountModel
+      .find({ user: userId })
+      .select("_id");
     const accountIds = userAccounts.map((acc) => acc._id);
 
     if (accountIds.length === 0) {

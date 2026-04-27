@@ -38,7 +38,11 @@ async function createTransactionController(req, res) {
     }
 
     // Step 2: Validate idempotency key
-    if (!idempotencyKey || typeof idempotencyKey !== "string" || !idempotencyKey.trim()) {
+    if (
+      !idempotencyKey ||
+      typeof idempotencyKey !== "string" ||
+      !idempotencyKey.trim()
+    ) {
       return res.status(400).json({
         status: "failed",
         message: "idempotencyKey is required and must be a non-empty string",
@@ -161,7 +165,7 @@ async function createTransactionController(req, res) {
             idempotencyKey: finalIdempotencyKey,
           },
         ],
-        { session }
+        { session },
       );
 
       const createdTransaction = transaction[0];
@@ -178,7 +182,7 @@ async function createTransactionController(req, res) {
             note: "Transfer sent",
           },
         ],
-        { session }
+        { session },
       );
 
       // Step 7: Create CREDIT ledger entry
@@ -193,7 +197,7 @@ async function createTransactionController(req, res) {
             note: "Transfer received",
           },
         ],
-        { session }
+        { session },
       );
 
       // Step 8: Mark transaction COMPLETED
@@ -203,10 +207,18 @@ async function createTransactionController(req, res) {
 
     const createdTransactionId = transaction[0]?._id;
 
-    const populatedTransaction = await transactionModel.findById(createdTransactionId).populate([
-      { path: "fromAccount", populate: { path: "user", select: "email firstName lastName" } },
-      { path: "toAccount", populate: { path: "user", select: "email firstName lastName" } },
-    ]);
+    const populatedTransaction = await transactionModel
+      .findById(createdTransactionId)
+      .populate([
+        {
+          path: "fromAccount",
+          populate: { path: "user", select: "email firstName lastName" },
+        },
+        {
+          path: "toAccount",
+          populate: { path: "user", select: "email firstName lastName" },
+        },
+      ]);
 
     // Step 10: Send sender/receiver email notifications (non-blocking)
     try {
@@ -270,7 +282,10 @@ async function createTransactionController(req, res) {
           reason: error.message || "Transaction processing failed",
         });
       } catch (emailError) {
-        console.warn("Failed transaction notification email could not be sent:", emailError.message);
+        console.warn(
+          "Failed transaction notification email could not be sent:",
+          emailError.message,
+        );
       }
     }
 
@@ -299,7 +314,9 @@ async function getUserTransactionsController(req, res) {
     const userId = req.user._id;
     const { status } = req.query;
 
-    const userAccounts = await accountModel.find({ user: userId }).select("_id");
+    const userAccounts = await accountModel
+      .find({ user: userId })
+      .select("_id");
     const accountIds = userAccounts.map((acc) => acc._id);
 
     if (accountIds.length === 0) {
@@ -311,7 +328,10 @@ async function getUserTransactionsController(req, res) {
     }
 
     const filters = {
-      $or: [{ fromAccount: { $in: accountIds } }, { toAccount: { $in: accountIds } }],
+      $or: [
+        { fromAccount: { $in: accountIds } },
+        { toAccount: { $in: accountIds } },
+      ],
     };
 
     if (status) {
@@ -392,7 +412,8 @@ async function updateTransactionStatusController(req, res) {
     if (!["PENDING", "COMPLETED", "FAILED", "REVERSED"].includes(status)) {
       return res.status(400).json({
         status: "failed",
-        message: "Invalid status. Must be PENDING, COMPLETED, FAILED or REVERSED",
+        message:
+          "Invalid status. Must be PENDING, COMPLETED, FAILED or REVERSED",
       });
     }
 
@@ -419,7 +440,11 @@ async function updateTransactionStatusController(req, res) {
     await transaction.save();
 
     const updatedTransaction = await transaction.populate([
-      { path: "fromAccount", select: "currency status user", populate: { path: "user", select: "email" } },
+      {
+        path: "fromAccount",
+        select: "currency status user",
+        populate: { path: "user", select: "email" },
+      },
       { path: "toAccount", select: "currency status user" },
     ]);
 

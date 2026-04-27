@@ -125,36 +125,36 @@ function History() {
         <div className="space-y-4">
           <div className="overflow-hidden rounded-3xl border border-border bg-surface/40">
             {visible.map((t, i) => {
-            const isOut = myAccountIds.has(getAccountId(t.fromAccount));
-            const Icon = isOut ? ArrowUpRight : ArrowDownLeft;
-            return (
-              <div
-                key={t._id}
-                className={`flex items-center justify-between p-4 ${i !== 0 ? "border-t border-border" : ""}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-background">
-                    <Icon
-                      className={`h-4 w-4 ${isOut ? "text-foreground" : "text-neon"}`}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">
-                      {isOut ? "Sent" : "Received"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(t.createdAt).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-                <p
-                  className={`font-mono text-sm font-semibold ${isOut ? "text-foreground" : "text-neon"}`}
+              const isOut = myAccountIds.has(getAccountId(t.fromAccount));
+              const Icon = isOut ? ArrowUpRight : ArrowDownLeft;
+              return (
+                <div
+                  key={t._id}
+                  className={`flex items-center justify-between p-4 ${i !== 0 ? "border-t border-border" : ""}`}
                 >
-                  {isOut ? "−" : "+"}
-                  {formatCurrency(t.amount)}
-                </p>
-              </div>
-            );
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-background">
+                      <Icon
+                        className={`h-4 w-4 ${isOut ? "text-foreground" : "text-neon"}`}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">
+                        {isOut ? "Sent" : "Received"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(t.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <p
+                    className={`font-mono text-sm font-semibold ${isOut ? "text-foreground" : "text-neon"}`}
+                  >
+                    {isOut ? "−" : "+"}
+                    {formatCurrency(t.amount)}
+                  </p>
+                </div>
+              );
             })}
             {visible.length === 0 && (
               <div className="p-6 text-center text-sm text-muted-foreground">
@@ -166,7 +166,9 @@ function History() {
           {filtered.length > ITEMS_PER_PAGE && (
             <div className="flex items-center justify-between rounded-2xl border border-border bg-surface/40 px-4 py-3">
               <p className="text-xs text-muted-foreground">
-                Showing {pageStart + 1} to {Math.min(pageStart + ITEMS_PER_PAGE, filtered.length)} of {filtered.length}
+                Showing {pageStart + 1} to{" "}
+                {Math.min(pageStart + ITEMS_PER_PAGE, filtered.length)} of{" "}
+                {filtered.length}
               </p>
               <div className="flex items-center gap-2">
                 <button

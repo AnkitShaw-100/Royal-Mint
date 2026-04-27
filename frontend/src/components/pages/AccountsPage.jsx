@@ -148,8 +148,25 @@ function Accounts() {
     </div>
   );
 }
+
+function getAccountId(account) {
+  if (!account) return "";
+  if (typeof account === "string") return account;
+  return String(account._id ?? account.id ?? account.accountId ?? "");
+}
+
 function AccountCard({ account, balance, onFreeze, onActivate, onClose }) {
   const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const accountId = getAccountId(account);
+
+  const copyAccountId = async () => {
+    if (!accountId) return;
+    await navigator.clipboard.writeText(accountId);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1500);
+  };
+
   return (
     <div className="relative rounded-2xl border border-border bg-surface/60 p-6 transition hover:border-neon/40">
       <div className="flex items-start justify-between">
@@ -157,9 +174,18 @@ function AccountCard({ account, balance, onFreeze, onActivate, onClose }) {
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Account · {account.currency}
           </p>
-          <p className="mt-3 font-mono text-xs text-foreground/80">
-            acc_{account._id.slice(-10)}
-          </p>
+          <div className="mt-3 flex items-center gap-2">
+            <p className="font-mono text-xs text-foreground/80">
+              acc_{accountId.slice(-10)}
+            </p>
+            <button
+              type="button"
+              onClick={copyAccountId}
+              className="rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground transition hover:border-neon/40 hover:text-foreground"
+            >
+              {copied ? "Copied" : "Copy ID"}
+            </button>
+          </div>
         </div>
         <button
           onClick={() => setOpen(!open)}
