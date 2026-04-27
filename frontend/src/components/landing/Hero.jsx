@@ -10,7 +10,7 @@ import {
 
 export function Hero() {
   return (
-    <section className="relative mx-auto max-w-6xl px-4 pt-16 md:pt-24">
+    <section className="relative mx-auto max-w-6xl px-4 md:pt-14">
       <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
         {/* Left: copy */}
         <div>
