@@ -1,10 +1,8 @@
 // API client for the Royal Mint Express backend.
 // Reads VITE_API_URL at build time. Falls back to localhost:5000/api in dev.
 
-const RAW_API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5000";
-const API_URL = RAW_API_URL.replace(/\/+$/, "").endsWith("/api")
-  ? RAW_API_URL.replace(/\/+$/, "")
-  : `${RAW_API_URL.replace(/\/+$/, "")}/api`;
+// const RAW_API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5000/api";
 
 export class ApiError extends Error {
   constructor(status, message, body) {
