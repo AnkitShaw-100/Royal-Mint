@@ -7,6 +7,11 @@ import userModel from "../models/user.model.js";
  */
 async function authMiddleware(req, res, next) {
   try {
+    // Skip OPTIONS preflight requests
+    if (req.method === "OPTIONS") {
+      return next();
+    }
+
     // Get clerkId from header
     const clerkId = req.headers["x-clerk-id"];
 

@@ -78,10 +78,11 @@ let dbConnected = false;
 connectDB()
   .then(() => {
     dbConnected = true;
-    console.log("MongoDB connection successful");
+    console.log("✓ MongoDB connection successful");
   })
   .catch((err) => {
-    console.error("MongoDB connection failed:", err.message);
+    console.error("✗ MongoDB connection failed:", err.message);
+    // Don't throw - let the app start and queries will fail gracefully
   });
 
 app.get("/", (req, res) => {
@@ -99,8 +100,18 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Handle preflight requests
-app.options("*", cors());
+// Handle preflight requests - use middleware form instead of app.options
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, x-clerk-id");
+  res.header("Access-Control-Allow-Credentials", "true");
+  
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // Routes
 app.use("/api/users", userRouter);
@@ -119,6 +130,15 @@ app.use((err, req, res, next) => {
   // If headers already sent, delegate to default handler
   if (res.headersSent) {
     return next(err);
+  }
+
+  // Handle Mongoose timeout errors
+  if (err.name === "MongooseError" && err.message.includes("buffering timed out")) {
+    return res.status(503).json({
+      status: "error",
+      message: "Database connection timeout. Please try again.",
+      error: "DATABASE_TIMEOUT",
+    });
   }
 
   res.status(err.status || 500).json({
