@@ -11,15 +11,42 @@ dotenv.config();
 
 const app = express();
 
+const normalizeOrigin = (value) =>
+  String(value || "")
+    .trim()
+    .replace(/\/+$/, "");
+
+const configuredOrigins = [
+  process.env.FRONTEND_URL,
+  ...(process.env.FRONTEND_URLS ?? "")
+    .split(",")
+    .map((url) => url.trim())
+    .filter(Boolean),
+];
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://royal-mint-ankit.vercel.app",
+  "https://try-royal-mint.vercel.app",
+  ...configuredOrigins,
+]
+  .map(normalizeOrigin)
+  .filter(Boolean);
+
 // Middleware
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "https://royal-mint-ankit.vercel.app",
-      process.env.FRONTEND_URL,
-    ].filter(Boolean),
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+
+      const normalizedOrigin = normalizeOrigin(origin);
+      if (allowedOrigins.includes(normalizedOrigin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "x-clerk-id"],
@@ -42,6 +69,11 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRouter);
 app.use("/api/accounts", accountRouter);
 app.use("/api/transactions", transactionRouter);
+
+// Vercel/serverless deployments may forward paths without the /api prefix.
+app.use("/users", userRouter);
+app.use("/accounts", accountRouter);
+app.use("/transactions", transactionRouter);
 
 // For local development only
 if (process.env.NODE_ENV !== "production") {
